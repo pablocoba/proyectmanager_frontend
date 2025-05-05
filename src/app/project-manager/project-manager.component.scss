@@ -1,0 +1,18 @@
+.title{
+    display:flex;
+    gap: 1rem;
+    max-width:60;
+    justify-content: center;;
+}
+::ng-deep{
+    p-tabs{
+        max-width:70%;
+        margin:2rem auto;
+    }
+    p-tabpanels{
+        background-color:transparent !important;
+    }
+    p-tablist div{
+        background-color:transparent !important;
+    }
+}

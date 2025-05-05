@@ -1,0 +1,25 @@
+<div class="title">
+    <i class="pi pi-folder" style="font-size:3rem;"></i>
+    <h1>Projects</h1>
+</div>
+
+<p-tabs [value]="activeTabIndex" scrollable>
+    <p-tablist>
+    @for(tab of mockups; track tab.value){
+        <p-tab [value]="tab.value">
+        {{ tab.title }}
+        </p-tab>
+    }
+    </p-tablist>
+    <p-tabpanels>
+    @for(tab of mockups; track tab.value){
+        <p-tabpanel [value]="tab.value">
+        @if (tab.contentComponent) {
+            <ng-template [ngComponentOutlet]="tab.contentComponent"></ng-template>
+        } @else {
+            <p class="m-0">Contenido estático para la Tab {{ tab.value + 1 }}</p>
+        }
+        </p-tabpanel>
+    }
+    </p-tabpanels>
+</p-tabs>

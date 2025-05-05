@@ -1,0 +1,9 @@
+.nav-list{
+    display:flex;
+    gap:1rem;
+    margin: .75rem 2rem;
+    &>li{
+        font-family:"Poppins-Bold";
+        font-size:18px;
+    }
+}

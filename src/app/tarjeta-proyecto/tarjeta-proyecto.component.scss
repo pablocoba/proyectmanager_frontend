@@ -1,0 +1,38 @@
+::ng-deep{
+
+    .priority{
+        /*high*/
+        &-h{
+            padding:2px 6px;
+            border-radius:5px;
+            background-color:rgba(red,.2);
+        }
+        /*medium*/
+        &-m{
+            padding:2px 6px;
+            border-radius:5px;
+            background-color:rgba(255, 196, 0, 0.2);
+        }
+        /*low*/
+        &-l{
+            padding:2px 6px;
+            border-radius:5px;
+            background-color:rgba(145, 255, 0, 0.2);
+        }
+    
+    }
+    .p-card{
+        border:1px solid rgb(41, 41, 41);
+
+    }
+
+    p-button{
+        .p-ripple{
+            border-radius:16px !important;
+            padding:5px;
+        }
+        
+    }
+}
+
+
