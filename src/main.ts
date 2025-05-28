@@ -1,6 +1,20 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
+import { provideHttpClient } from '@angular/common/http';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { MiembroService } from './app/commons/services/MiembroService';
+import { ProyectoService } from './app/commons/services/ProyectoService';
+import { NgModule, LOCALE_ID, importProvidersFrom } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
-bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => console.error(err));
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideHttpClient(),
+    MiembroService,
+    ProyectoService,
+    ConfirmationService,
+    MessageService,
+    importProvidersFrom(CommonModule)
+  ]
+})
+.catch((err) => console.error(err));
