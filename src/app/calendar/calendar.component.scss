@@ -3,3 +3,19 @@
     width:100px;
     height:10rem;
 }
+
+.arrow-buttons{
+    display:flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+}
+
+::ng-deep{
+    .arrow-buttons{
+        .p-button{
+            border-radius:999px !important;
+            padding:.25rem !important;
+        }
+    }
+}

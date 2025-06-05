@@ -6,6 +6,8 @@ import { MiembroService } from './app/commons/services/MiembroService';
 import { ProyectoService } from './app/commons/services/ProyectoService';
 import { NgModule, LOCALE_ID, importProvidersFrom } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AlertService } from './app/commons/services/AlertService';
+import { provideAnimations } from '@angular/platform-browser/animations';
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -14,7 +16,9 @@ bootstrapApplication(AppComponent, {
     ProyectoService,
     ConfirmationService,
     MessageService,
-    importProvidersFrom(CommonModule)
+    importProvidersFrom(CommonModule),
+    AlertService,
+    provideAnimations()
   ]
 })
 .catch((err) => console.error(err));

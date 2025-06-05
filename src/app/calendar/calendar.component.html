@@ -1,8 +1,44 @@
-<div class="p-10 m-auto lg:w-70">
+<div class="md:hidden p-10 m-auto lg:w-70">
     <div class="m-auto">
-        <span class="block text-center p-3">{{ weekDayName(hoy) }}</span>
-        <div class="bg-blue-500 h-70 lg:h-100 rounded-sm">
-            <p class="text-right p-3">{{hoy | date:'dd'}}</p>
+        <span class="block text-center p-3">{{ weekDayName(currentDateSelected) }}</span>
+        <div class="bg-blue-500 rounded-md max-h-[20rem]">
+            <p class="text-right p-3 text-lg">{{currentDateSelected | date:'dd'}}</p>
+            <div *ngIf="hasEvent === false" class="border-dashed border-2 rounded-md m-3 h-[70%] p-5" (click)="showAddEventDialog()">
+                <i class="pi pi-plus"></i> Nuevo Evento
+            </div>
+            <div *ngIf="hasEvent === true" class="p-5 m-3 bg-gray-900 rounded-md" (click)="showEventDialog()">
+                <h3 class="text-2xl font-bold">{{currentEvent.titulo}}</h3>
+                <p>{{currentEvent.descripcion | descTruncate}}</p>
+            </div>
+            <div class="arrow-buttons px-5 py-3 pb-5">                
+                <p-button><i class="pi pi-angle-left" style="font-size:1.5rem;" (click)="previous()"></i></p-button>
+                <p-button><i class="pi pi-angle-right" style="font-size:1.5rem;" (click)="next()"></i></p-button>
+            </div>
         </div>
     </div>
 </div>
+
+<section class="hidden md:block">
+    <div class="arrow-buttons px-5 py-3 pb-5">                
+        <p-button><i class="pi pi-angle-left" style="font-size:1.5rem;" (click)="previous()"></i></p-button>
+        <p-button><i class="pi pi-angle-right" style="font-size:1.5rem;" (click)="next()"></i></p-button>
+    </div>
+    <div class="flex flex-row">
+        <div *ngFor="let day of displayedDays">
+        <div class="m-auto">
+            <span class="block text-center p-3">{{ weekDayName(day) }}</span>
+            <div class="bg-blue-500 border-1">
+                <p class="text-right p-3 text-lg">{{day | date:'dd'}}</p>
+                <div *ngIf="hasEvent === false" class="border-dashed border-2 rounded-md m-3 h-[70%] p-5" (click)="showAddEventDialog()">
+                    <i class="pi pi-plus"></i> Nuevo Evento
+                </div>
+                <div *ngIf="hasEvent === true" class="p-5 m-3 bg-gray-900 rounded-md" (click)="showEventDialog()">
+                    <h3 class="text-2xl font-bold">{{currentEvent.titulo}}</h3>
+                    <p>{{currentEvent.descripcion | descTruncate}}</p>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    </div>
+</section>

@@ -1,0 +1,14 @@
+<div class="p-4 bg-blue-500 text-white rounded-lg">
+    <form [formGroup]="addEventForm" (ngSubmit)="onEventAdded()">
+        <div class="flex flex-col gap-3 p-3">
+            <input pInputText class="mr-auto rounded-md" id="eventName" formControlName="eventName" placeholder="Nombre del Evento"/>
+            <input pInputText class="mr-auto rounded-md" id="eventDescription" formControlName="eventDescription" placeholder="Descripción del Evento"/>
+        </div>
+
+    <div class="flex justify-end mt-4">
+        <p-button label="Guardar" [disabled]="addEventForm.pristine" type="submit"></p-button>
+    </div>
+    </form> 
+
+
+</div>

@@ -8,7 +8,7 @@ import { Miembros } from "../dto/Miembros";
 })
 
 export class MiembroService {
-    private baseUrl : string = 'http://localhost:8080';
+    private baseUrl : string = 'https://tfc-t00f.onrender.com';
     private miembrosUrl : string = '/miembros';
 
     constructor(private http: HttpClient){ }
