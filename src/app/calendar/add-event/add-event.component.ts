@@ -37,7 +37,9 @@ export class AddEventComponent {
 
   ngOnInit(){
     this.currentDateSelected = this.config.data;
+    console.log(this.currentDateSelected)
   }
+
   onCancel(){
     this.closeDialog.emit();
     this.ref.close();

@@ -1,13 +1,21 @@
-.dia-calendario{
-    display:inline-block;
-    width:100px;
-    height:10rem;
-}
+:root{
+    .dia-calendario{
+        display:inline-block;
+        width:100px;
+        height:10rem;
+    }
 
-.arrow-buttons{
-    display:flex;
-    flex-direction: row;
-    justify-content: space-between;
+    .arrow-buttons{
+        display:flex;
+        flex-direction: row;
+        justify-content: space-between;
+
+    }
+
+    .calendar{
+        display:flex;
+        justify-content: center;
+    }
 
 }
 

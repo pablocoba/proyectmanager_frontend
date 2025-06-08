@@ -3,14 +3,12 @@
     <h1>Tareas</h1>
 </div>
 
-<div class="title">
-
-</div>
-
-<div class="mt-5 lg:w-250 grid justify-center lg:grid-cols-3 m-auto">
-    <app-tarjeta-proyecto></app-tarjeta-proyecto>
-    <app-tarjeta-proyecto></app-tarjeta-proyecto>
-    <app-tarjeta-proyecto></app-tarjeta-proyecto>
-</div>
+<p-button>
+    <app-tarjeta-tarea 
+    *ngFor="let tarea of tareas; let i = index"
+    [tareaData]="tarea"
+    [index]="i"
+    ></app-tarjeta-tarea>
+</p-button>
 
 

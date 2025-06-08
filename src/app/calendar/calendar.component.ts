@@ -1,17 +1,23 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { DiaHoy } from '../commons/dto/DiaHoy';
+import { ChangeDetectorRef, Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { AddEventComponent } from './add-event/add-event.component';
 import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AlertService } from '../commons/services/AlertService';
-import { Footer, MessageService } from 'primeng/api';
+import {  MessageService } from 'primeng/api';
 import { Subscription } from 'rxjs';
 import { Evento } from '../commons/dto/Evento';
 import { DescTruncatePipe } from '../commons/pipes/desc-truncate.pipe';
-import { ViewEventComponent } from './view-event/view-event.component';
 import { ButtonModule } from 'primeng/button';
-import { Miembros } from '../commons/dto/Miembros';
+import { EventoService } from '../commons/services/EventoService';
+import { EventoDto } from '../commons/dto/EventoDto';
+import { ProyectoService } from '../commons/services/ProyectoService';
 import { MiembroService } from '../commons/services/MiembroService';
+import { formatDate } from '../commons/functions/formatDate';
+import { ProyectoDto } from '../commons/dto/ProyectoDto';
+import { CalendarDay } from '../commons/dto/CalendarDay';
+import { ViewEventComponent } from './view-event/view-event.component';
+
+
 @Component({
   selector: 'app-calendar',
   imports: [
@@ -28,33 +34,26 @@ import { MiembroService } from '../commons/services/MiembroService';
     MessageService
   ],
 })
-export class CalendarComponent {
+export class CalendarComponent implements OnInit{
 
   ref: DynamicDialogRef | undefined;
   private dialogSubscription: Subscription | undefined; // Para gestionar la suscripción
 
-  week: any= ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"]
   todayDate: Date = new Date();
-  manana : Date = new Date(this.todayDate);
-  displayedDays: Date[] = [
-  ]; //mostrará 5 días en desktop y 1 en móvil
-  miembros : Miembros[] = [];
+  displayedDays: CalendarDay[]= [] //mostrará 5 días en desktop y 1 en móvil
+  displayedEventDays: CalendarDay[] = []
+  currentProject : ProyectoDto ={
+    idProyecto: 1,
+    nombre:"string",
+    descripcion:"string" ,
+    fechaInicio:formatDate(new Date()),
+    fechaFin:formatDate(new Date()),
+  }
+  eventos : Evento[] = [];
   currentDateSelected: Date = new Date();
   hasEvent: boolean = false;
-  dummyEvent : Evento={
-    idEvento: 0,
-    idProyecto: 0,
-    titulo: "Evento",
-    fecha: new Date,
-    descripcion: "esto es un Evento que la verdad que es la puta polla porque me flipa y estoy encantado de tener este proyecto la verdad"
-  }
 
-  currentEvent : Evento = this.dummyEvent;
-
-
-  eventos: Evento[] =[
-    this.dummyEvent,
-  ]
+  currentEvent !: Evento
 
   //Devuelve el nombre completo del día de hoy en Español.
   weekDayName(hoy: Date){
@@ -79,23 +78,35 @@ export class CalendarComponent {
     return "Lunes";
   }
 
- constructor(
-  public dialogService : DialogService,
-  private alertService : AlertService,
-  private miembrosService : MiembroService
- ){
-  this.miembrosService.getMiembros().subscribe(miembro=>{
-    this.miembros = miembro;
-    console.log(this.miembros)
-  })
- }
+  constructor(
+    public dialogService : DialogService,
+    private alertService : AlertService,
+    private eventoService : EventoService,
+    private proyectoService : ProyectoService,
+    private miembroService : MiembroService,
+    private cdr : ChangeDetectorRef
+  ){
+    
+    this.proyectoService.getProyectosById(1).subscribe(proyecto=>{
+      this.currentProject = proyecto;
+    })
+    
 
-  ngOnInit(){
-    this.checkTodayEvent()
-    this.displayedDays = this.generateCalendarDays()
   }
 
-  showAddEventDialog() {
+  async ngOnInit(){
+
+    await this.loadEventos()
+    this.displayedDays = this.generateCalendarDays()
+    await this.mapEventsToDisplayedDays()
+    console.log(this.eventos)
+    this.checkTodayEvent()
+    console.log("displayedDays",this.displayedDays)
+    console.log("cosa",this.displayedDays[1].fecha,this.todayDate)
+  }
+
+  //abre el diálogo de añadir evento y le pasa los datos.
+  showAddEventDialog(dayData:Date) {
     const isMobile = window.innerWidth < 768;
 
     this.ref = this.dialogService.open(AddEventComponent, {
@@ -109,22 +120,36 @@ export class CalendarComponent {
         overflow: 'auto',
         'padding': '0'
       },
-      data:this.currentDateSelected,
+      data:dayData,
       baseZIndex: 10000
     });
 
-    this.dialogSubscription = this.ref.onClose.subscribe(event=>{
+    this.dialogSubscription = this.ref.onClose.subscribe(async event=>{
+      console.log("cierre de crear",event)
       if(event !== null && event !== undefined){
-        let newEvent : Evento = {
-          idEvento:1,
-          idProyecto: 1,
+        let newEvent : EventoDto = {
+          proyecto: this.currentProject,
           titulo: event[1],
-          descripcion: event[2],
-          fecha: event[3]
+          fecha: event[3],
+          descripcion: event[2]
         }
-        this.eventos.push(newEvent);
-        this.hasEvent = event[0];
-        this.checkTodayEvent();
+
+        try{
+          const createdEvento = await this.eventoService.createEvento(newEvent).toPromise();
+          console.log("Evento creado exitosamente:", createdEvento);
+          
+          await this.loadEventos();
+          this.hasEvent = true;
+          this.checkTodayEvent();
+          this.updateCurrentDayEventState();
+          this.mapEventsToDisplayedDays();
+          this.cdr.detectChanges();
+        }
+        catch(error){
+          console.log("no carga el evento", error)
+        }
+        
+        
 
       }
       else{
@@ -133,7 +158,8 @@ export class CalendarComponent {
     })
   }
 
-  showEventDialog() {
+  //abre el diálogo de enseñar el evento y le pasa los datos para mostrarlo
+  showEventDialog(CalendarDay : CalendarDay) {
 
     const isMobile = window.innerWidth < 768;
 
@@ -147,62 +173,84 @@ export class CalendarComponent {
         overflow: 'auto',
         'padding': '0'
       },
-      data:this.dummyEvent,
+      data:{CalendarDay: CalendarDay, project: this.currentProject},
       baseZIndex: 10000
     });
 
-    
+    this.dialogSubscription = this.ref.onClose.subscribe(async event => { // <-- Mantén 'async' aquí
+    try {
+      // Si loadEventos ya devuelve una Promise, SOLO usa await directamente:
+      await this.eventoService.deleteEvento(event).toPromise();
+
+      await this.loadEventos(); 
+      this.hasEvent = false; 
+      this.checkTodayEvent();
+      this.updateCurrentDayEventState();
+      this.mapEventsToDisplayedDays();
+
+    } catch (error) {
+      console.error("Error al cargar eventos tras cerrar diálogo:", error);
+    }
+  });
+
+
+
   }
 
   //pasa al día siguiente
   next(){
-    const oldDate = this.currentDateSelected;
+    const oldDate = new Date(this.currentDateSelected);
     let newFecha = new Date(oldDate);
     newFecha.setDate(oldDate.getDate() + 1);
     this.currentDateSelected = newFecha;
     this.checkTodayEvent();
 
     //cambia las fechas del calendario grande
-    let newOldestDate : Date;
-    newOldestDate = new Date(this.displayedDays[this.displayedDays.length-1])
-    newOldestDate.setDate(newOldestDate.getDate()+1)
+    let newOldestDate : CalendarDay;
+    newOldestDate = {fecha: new Date(this.displayedDays[this.displayedDays.length-1].fecha), event: null}
+    newOldestDate.fecha.setDate(newOldestDate.fecha.getDate()+1)
     this.displayedDays.shift();
     this.displayedDays.push(newOldestDate)
+    this.mapEventsToDisplayedDays()
   }
 
   //pasa al día anterior
   previous(){
-    const oldDate = this.currentDateSelected;
+    const oldDate = new Date(this.currentDateSelected);
     let newFecha = new Date(oldDate);
     newFecha.setDate(oldDate.getDate() - 1);
     this.currentDateSelected = newFecha;
     this.checkTodayEvent()
 
     //cambia las fechas del calendario grande 1 dia hacia atrás
-    let newNewestDate : Date;
-    newNewestDate = new Date(this.displayedDays[0])
-    newNewestDate.setDate(newNewestDate.getDate()-1)
+    let newNewestDate : CalendarDay;
+    newNewestDate = {fecha: new Date(this.displayedDays[0].fecha), event: null}
+    newNewestDate.fecha.setDate(newNewestDate.fecha.getDate()-1)
     this.displayedDays.pop();
     this.displayedDays.unshift(newNewestDate)
+    this.mapEventsToDisplayedDays()
   }
 
   //checkea si la fecha de hoy coincide con la fecha de algún evento.
   //TODO hay que hacer que recoja el array de los eventos de la base de datos y recorra las fechas para esto.
   checkTodayEvent(){
 
-    console.log("eventos:", this.eventos)
-
+    console.log("funcionando checkTodayEvent")
     for(let evento of this.eventos){
+
       let fechaEvento = evento.fecha;
-      for(let dia of this.displayedDays){
-        if(dia.getDay() == this.currentDateSelected.getDay()){
+      let fecha = new Date(evento.fecha)
+
+        if(this.isSameDay(fecha, this.currentDateSelected)){
+
           this.currentEvent = evento
+          this.hasEvent = true;
         return
         }
         else{
           this.hasEvent = false;
         }
-      }
+      
     }
 
   }
@@ -210,34 +258,99 @@ export class CalendarComponent {
   //TODO MAÑANA
   checkDateEvents(){
     
-    for(let evento of this.eventos){
-      let fechaEvento = evento.fecha;
-      if(fechaEvento.getDay() == this.currentDateSelected.getDay()){
-        this.hasEvent = true;
-        this.currentEvent = evento
-        console.log(this.currentEvent)
-        return
+    for(let dia of this.displayedDays){
+      
+      for(let evento of this.eventos){
+
+        
+
       }
-      else{
-        this.hasEvent = false;
-      }
+  
     }
+
   }
 
   //metodo que genera 5 días para el calendario desktop en base al día de hoy
   //genera ayer, hoy y los 3 días siguientes
   generateCalendarDays(){
-    let dates : Date[] = [];
-    let yesterday = new Date(this.todayDate);
-    yesterday.setDate(this.todayDate.getDate()-1)
+    let dates : CalendarDay[] = [];
+    let yesterday : CalendarDay = {fecha: new Date(this.todayDate), event: null};
+    let today : CalendarDay = {fecha: new Date(this.todayDate), event: null}
+    yesterday.fecha.setDate(this.todayDate.getDate()-1)
+    
     dates.push(yesterday)
-    dates.push(this.todayDate)
+    dates.push(today);
     for(let i = 1; i < 4; i++){
-      let newDate = new Date(this.todayDate);
-      newDate.setDate(this.todayDate.getDate()+i)
+      let newDate : CalendarDay = {fecha:new Date(this.todayDate), event:null};
+      newDate.fecha.setDate(this.todayDate.getDate()+i)
       dates.push(newDate)
     }
     return dates;
+  }
+
+  async loadEventos() {
+    console.log("cargando eventos...",this.eventos)
+    try {
+      const eventos = await this.eventoService.getEventos().toPromise();
+      this.eventos = eventos || []; // Si es undefined, usa array vacío
+      console.log('Eventos cargados:', this.eventos);
+
+    } catch (error) {
+      console.error('Error:', error);
+      this.eventos = []; // También en caso de error
+    }
+  }
+
+  updateCurrentDayEventState(): void {
+  let eventFoundForCurrentDay: Evento | null = null;
+
+  // Itera sobre todos tus eventos cargados
+  for (let evento of this.eventos) {
+    // Compara la fecha del evento con la fecha del día actualmente seleccionado
+    if (this.isSameDay(new Date(evento.fecha), this.currentDateSelected)) {
+      eventFoundForCurrentDay = evento;
+      break; // Si encuentras el evento, puedes salir del bucle
+      }
+    }
+      // Actualiza las propiedades que controlan la vista
+    if (eventFoundForCurrentDay) {
+      this.hasEvent = true;
+      this.currentEvent = eventFoundForCurrentDay;
+    } else {
+      this.hasEvent = false;
+    }
+
+  }
+
+  isSameDay(date1: Date, date2: Date): boolean {
+    return date1.getFullYear() === date2.getFullYear() &&
+          date1.getMonth() === date2.getMonth() &&
+          date1.getDate() === date2.getDate();
+  }
+
+  mapEventsToDisplayedDays(): void {
+  this.displayedEventDays = this.displayedDays; // Limpia el array antes de rellenarlo
+  this.displayedDays = []
+  // Itera sobre cada una de las fechas puras que deben ser mostradas
+  for (let day of this.displayedEventDays) {
+    let foundEvent: Evento | null = null; // Inicializa como null
+
+    for (let evento of this.eventos) {
+      const eventDate = new Date(evento.fecha);
+      if (this.isSameDay(day.fecha, eventDate)) {
+        foundEvent = evento; 
+        break; 
+      }
+    }
+
+      // Añade el objeto DayWithEvent a tu nuevo array
+      this.displayedDays.push({
+        fecha: day.fecha,
+        event: foundEvent // Será el Evento encontrado o null
+      });
+    }
+
+    
   }
 
 }

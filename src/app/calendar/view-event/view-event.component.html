@@ -1,8 +1,25 @@
 <div class="p-4 bg-blue-500 text-white rounded-lg">
+    <form [formGroup]="eventForm" *ngIf="editMode; else viewMode">
+        <!-- Modo edición -->
+        <div class="flex flex-col gap-3 p-3">
+            <input pInputText formControlName="titulo" class="w-full">
+            <textarea pInputTextarea formControlName="descripcion" class="w-full"></textarea>
+        </div>
+        <div class="flex flex-row justify-end gap-3">
+            <p-button label="Guardar" (click)="saveChanges()"></p-button>
+            <p-button label="Cancelar" severity="secondary" (click)="editMode = false"></p-button>
+        </div>
+    </form>
 
-    <div class="flex flex-col gap-3 p-3">
-        <h3 class="text-2xl font-bold">{{event.titulo}}</h3>
-        <p>{{event.descripcion}}</p>
-    </div>
-
+    <ng-template #viewMode>
+        <!-- Modo visualización -->
+        <div class="flex flex-col gap-3 p-3">
+            <h3 class="text-2xl font-bold">{{currentEvent?.titulo}}</h3>
+            <p>{{currentEvent?.descripcion}}</p>
+        </div>
+        <div class="flex flex-row justify-end gap-3">
+            <p-button label="Editar" (click)="editMode = true"></p-button>
+            <p-button label="Eliminar" (click)="deleteEvent()" severity="danger"></p-button>
+        </div>
+    </ng-template>
 </div>

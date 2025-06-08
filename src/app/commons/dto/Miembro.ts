@@ -1,4 +1,4 @@
-export interface Miembros {
+export interface Miembro {
     id : number,
     nombreUsuario : string,
     correo : string,

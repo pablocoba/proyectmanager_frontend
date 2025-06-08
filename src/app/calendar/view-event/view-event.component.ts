@@ -1,37 +1,81 @@
-import { Component, EventEmitter, Inject, Input, Output } from '@angular/core';
-import { FormGroup, FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Component, EventEmitter, Inject, Input, Output, ViewEncapsulation } from '@angular/core';
+import { FormGroup, FormControl, Validators, FormsModule, ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
-import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DialogService, DynamicDialogConfig, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { Evento } from '../../commons/dto/Evento';
+import { EventoService } from '../../commons/services/EventoService';
+import { CalendarDay } from '../../commons/dto/CalendarDay';
+import { CommonModule } from '@angular/common';
+import { EventoDto } from '../../commons/dto/EventoDto';
 
-@Component({
-  selector: 'app-view-event',
-  imports: [
+  @Component({
+    selector: 'app-view-event',
+    imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    DynamicDialogModule,
     ButtonModule,
     InputTextModule,
-    FormsModule,
-    ReactiveFormsModule,
-    FloatLabelModule
-  ],
-  templateUrl: './view-event.component.html',
-  styleUrl: './view-event.component.scss'
-})
+    InputTextModule,
+    FloatLabelModule,
+    ConfirmDialogModule
+    ],
+    templateUrl: './view-event.component.html',
+    styleUrl: './view-event.component.scss',
+    encapsulation: ViewEncapsulation.None
+
+  })
 export class ViewEventComponent {
-@Output() closeDialog = new EventEmitter<void>();
-event !: Evento;
-  hasEvent: boolean = false;
+
+  @Output() closeDialog = new EventEmitter<void>();
+  currentEvent: Evento | null = null; // Inicializa como null
+  currentDayDate: Date | null = null;
+  editMode : boolean = false;
+
+  eventForm : FormGroup = new FormGroup({
+    titulo: new FormControl(null),
+    descripcion : new FormControl(null)
+  })
 
   constructor(@Inject(DynamicDialogConfig) private config: DynamicDialogConfig,
-    private ref: DynamicDialogRef,){
+    private ref: DynamicDialogRef, private  eventoService : EventoService){
       
     }
 
     ngOnInit(){
-      this.event = this.config.data;
-      console.log(this.event)
+
+      this.currentEvent = this.config.data.CalendarDay.event
+      this.currentDayDate = this.config.data.CalendarDay.fecha
+    }
+    
+    saveChanges() {
+      if (this.eventForm.valid && this.currentEvent) {
+        this.currentEvent.titulo = this.eventForm.get('titulo')?.value
+        this.currentEvent.descripcion = this.eventForm.get('descripcion')?.value
+        let eventoDto : EventoDto={
+          titulo: this.eventForm.get('titulo')?.value,
+          fecha: this.currentEvent.fecha,
+          descripcion: this.eventForm.get('descripcion')?.value,
+          proyecto:this.config.data.project
+        }
+
+        console.log("eventoDto", eventoDto)
+        this.eventoService.updateEvento(this.currentEvent.idEvento, eventoDto).subscribe({
+          next: (evento) => {
+            console.log(evento)
+            this.editMode = false;
+            this.ref.close(true); // Cierra el diálogo y emite confirmación
+          },
+          error: (err) => console.error('Error al guardar:', err)
+        });
+      }
     }
 
-
+    deleteEvent(){
+      this.ref.close(this.currentEvent?.idEvento!); 
+    }
 }

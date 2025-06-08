@@ -1,0 +1,7 @@
+:host{
+    .shadow{
+        box-shadow:
+        inset 0 0 11px 1px rgb(105, 105, 105),   /* Sombra general difuminada */
+        inset 0 0 0 1px rgb(138, 138, 138);       /* Borde interno sólido (opcional) */
+    }
+}

@@ -1,44 +1,50 @@
-<div class="md:hidden p-10 m-auto lg:w-70">
-    <div class="m-auto">
-        <span class="block text-center p-3">{{ weekDayName(currentDateSelected) }}</span>
-        <div class="bg-blue-500 rounded-md max-h-[20rem]">
-            <p class="text-right p-3 text-lg">{{currentDateSelected | date:'dd'}}</p>
-            <div *ngIf="hasEvent === false" class="border-dashed border-2 rounded-md m-3 h-[70%] p-5" (click)="showAddEventDialog()">
-                <i class="pi pi-plus"></i> Nuevo Evento
-            </div>
-            <div *ngIf="hasEvent === true" class="p-5 m-3 bg-gray-900 rounded-md" (click)="showEventDialog()">
-                <h3 class="text-2xl font-bold">{{currentEvent.titulo}}</h3>
-                <p>{{currentEvent.descripcion | descTruncate}}</p>
-            </div>
-            <div class="arrow-buttons px-5 py-3 pb-5">                
-                <p-button><i class="pi pi-angle-left" style="font-size:1.5rem;" (click)="previous()"></i></p-button>
-                <p-button><i class="pi pi-angle-right" style="font-size:1.5rem;" (click)="next()"></i></p-button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<section class="hidden md:block">
-    <div class="arrow-buttons px-5 py-3 pb-5">                
-        <p-button><i class="pi pi-angle-left" style="font-size:1.5rem;" (click)="previous()"></i></p-button>
-        <p-button><i class="pi pi-angle-right" style="font-size:1.5rem;" (click)="next()"></i></p-button>
-    </div>
-    <div class="flex flex-row">
-        <div *ngFor="let day of displayedDays">
+<section class="calendar">
+    
+    <div class="lg:hidden p-10 m-auto">
         <div class="m-auto">
-            <span class="block text-center p-3">{{ weekDayName(day) }}</span>
-            <div class="bg-blue-500 border-1">
-                <p class="text-right p-3 text-lg">{{day | date:'dd'}}</p>
-                <div *ngIf="hasEvent === false" class="border-dashed border-2 rounded-md m-3 h-[70%] p-5" (click)="showAddEventDialog()">
+            <span class="block text-center p-3">{{ weekDayName(currentDateSelected) }}</span>
+            <div class="bg-blue-500 rounded-md max-h-[20rem]">
+                <p class="text-right p-3 text-lg">{{currentDateSelected | date:'dd'}}</p>
+                <div *ngIf="hasEvent === false" class="border-dashed border-2 rounded-md m-3 h-[70%] p-5" (click)="showAddEventDialog(currentDateSelected)">
                     <i class="pi pi-plus"></i> Nuevo Evento
                 </div>
-                <div *ngIf="hasEvent === true" class="p-5 m-3 bg-gray-900 rounded-md" (click)="showEventDialog()">
+                <div *ngIf="hasEvent === true" class="p-5 m-3 bg-gray-900 rounded-md" (click)="showEventDialog(this.displayedDays[1])">
                     <h3 class="text-2xl font-bold">{{currentEvent.titulo}}</h3>
                     <p>{{currentEvent.descripcion | descTruncate}}</p>
                 </div>
+                <div class="arrow-buttons px-5 py-3 pb-5">                
+                    <p-button><i class="pi pi-angle-left" style="font-size:1.5rem;" (click)="previous()"></i></p-button>
+                    <p-button><i class="pi pi-angle-right" style="font-size:1.5rem;" (click)="next()"></i></p-button>
+                </div>
             </div>
         </div>
-        
     </div>
+
+    <div class="hidden lg:flex flex-col align-middle max-w-full">
+        <div class="arrow-buttons px-5 py-3 pb-5 flex flex-row justify-between max-w-full">                
+            <p-button><i class="pi pi-angle-left" style="font-size:1.5rem;" (click)="previous()"></i></p-button>
+            <h2 class="text-xl font-bold">Calendario</h2>
+            <p-button><i class="pi pi-angle-right" style="font-size:1.5rem;" (click)="next()"></i></p-button>
+        </div>
+        <div class="flex flex-row">
+            <div *ngFor="let day of displayedDays">
+            <div class="m-auto">
+                <span class="block text-center p-3">{{ weekDayName(day.fecha) }}</span>
+                <div class="bg-blue-500 border-2 rounded-md border-black">
+                    <p class="text-right p-3 text-lg">{{day.fecha | date:'dd'}}</p>
+                    <div class="flex flex-row justify-center">
+                        <div *ngIf="day.event === null" class="border-dashed border-2 rounded-md lg:m-3 h-[70%] p-5 m-1" (click)="showAddEventDialog(day.fecha)">
+                        <i class="pi pi-plus"></i> Nuevo Evento
+                    </div>
+                    <div *ngIf="day.event !== null" class="p-5 lg:m-3 bg-gray-900 rounded-md max-w-[300px] m-2" (click)="showEventDialog(day)">
+                        <h3 class="text-xl font-bold">{{day.event.titulo}}</h3>
+                        <p class="max-w-50">{{day.event.descripcion | descTruncate}}</p> 
+                    </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        </div>
     </div>
 </section>

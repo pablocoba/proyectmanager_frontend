@@ -1,0 +1,19 @@
+<p-card [style]="{ width: '14rem', overflow: 'hidden'}" class="bg-blue-500">
+
+    <ng-template #title> 
+        <p class="text-left font-bold">{{tareaData.titulo}}</p>
+    </ng-template>
+
+    <div class="text-start">
+        {{tareaData.descripcion | descTruncate}}
+    </div>
+
+    <!-- <ng-template #footer>
+        <div class="flex justify-between">
+            <span class="priority-h">Prioridad alta</span>
+            <span><b>·</b></span>
+            <span class="">{{tareaData.fechaFin}}</span>
+        </div>
+    </ng-template> -->
+</p-card>
+

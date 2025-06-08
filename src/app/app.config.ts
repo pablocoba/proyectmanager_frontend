@@ -5,6 +5,8 @@ import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import Noir from '../noirpreset';
 import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { routes } from './app.routes';
 
 
 export const appConfig: ApplicationConfig = {
@@ -15,7 +17,8 @@ export const appConfig: ApplicationConfig = {
             theme: {
                 preset: Noir
             }
-        })
+        }),
+        provideRouter(routes),
     ]
 };
 
