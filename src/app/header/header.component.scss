@@ -1,8 +1,42 @@
 :root{
-    .p-inputtext{
+    /* .p-inputtext{
         border-radius:5px;
         border:1px solid black;
         height:35px;
         padding:9px;
+    } */
+    
+}
+::ng-deep{
+    /* .p-menu-item{
+        padding:.6rem;
+        border-radius:5px;
+        &:hover{
+            background-color:rgb(80, 80, 80);
+        }
+
+    }
+    
+    .p-menu-list{
+        padding:.4rem;
+        border-radius:8px !important;
+        background-color:rgb(44, 44, 44);
+        .p-menu-item-icon{
+            margin-right:5px;
+        }
+    } */
+    @media screen and (max-width: 1024px){
+    .p-drawer-active{
+        background-color: black;
+    }
+}
+
+
+}
+
+@media screen and (min-width: 1024px){
+    .sidebarMove{
+        margin-left:350px;
+        padding-top:4px;
     }
 }

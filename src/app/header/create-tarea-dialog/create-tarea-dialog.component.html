@@ -3,9 +3,8 @@
         <div class="flex flex-col gap-3 p-3">
             <input pInputText class="mr-auto rounded-md" id="titulo" formControlName="titulo" placeholder="Título"/>
             <input pInputText class="mr-auto rounded-md" id="descripcion" formControlName="descripcion" placeholder="Descripción"/>
-            <input pInputText class="mr-auto rounded-md" id="fechaFin" formControlName="fechaFin" placeholder="Fecha de fin"/>
+            <p-datepicker class="mr-auto rounded-md" id="fechaFin" formControlName="fechaFin" placeholder="Fecha de fin" appendTo="body"/>
         </div>
-
     <div class="flex justify-end mt-4">
         <p-button label="Guardar" [disabled]="createTareaForm.pristine" type="submit"></p-button>
     </div>

@@ -10,6 +10,7 @@ import { EventoService } from '../../commons/services/EventoService';
 import { CalendarDay } from '../../commons/dto/CalendarDay';
 import { CommonModule } from '@angular/common';
 import { EventoDto } from '../../commons/dto/EventoDto';
+import { Textarea, TextareaModule } from 'primeng/textarea';
 
   @Component({
     selector: 'app-view-event',
@@ -20,7 +21,7 @@ import { EventoDto } from '../../commons/dto/EventoDto';
     DynamicDialogModule,
     ButtonModule,
     InputTextModule,
-    InputTextModule,
+    TextareaModule,
     FloatLabelModule,
     ConfirmDialogModule
     ],
@@ -50,6 +51,9 @@ export class ViewEventComponent {
 
       this.currentEvent = this.config.data.CalendarDay.event
       this.currentDayDate = this.config.data.CalendarDay.fecha
+      this.eventForm.get('titulo')?.setValue(this.currentEvent?.titulo);
+      this.eventForm.get('descripcion')?.setValue(this.currentEvent?.descripcion);
+
     }
     
     saveChanges() {

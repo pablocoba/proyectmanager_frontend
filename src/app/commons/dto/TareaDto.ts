@@ -1,6 +1,5 @@
 import { EstadoTarea } from "./EstadoTarea";
 import { Miembro } from "./Miembro";
-import { Proyecto } from "./Proyecto";
 import { ProyectoDto } from "./ProyectoDto";
 
 export interface TareaDto{

@@ -8,9 +8,17 @@
         height:35px;
         padding:9px;
     }
-
+    .p-textarea{
+        border-radius:5px;
+        border:1px solid black;
+        padding:9px;
+    }
     
     .button-main{
         border: solid 1px white;
+    }
+    .p-drawer-active ~ .main-content {
+        margin-left: 250px !important; /* Igual al ancho del drawer */
+        transition: margin-left 0.3s ease; /* Animación suave */
     }
 }   

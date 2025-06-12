@@ -18,6 +18,7 @@ export class ProyectoService {
     getProyectos(): Observable<ProyectoDto[]>{
         return this.http.get<ProyectoDto[]>(`${this.baseUrl}${this.proyectosUrl}`);
     }
+
     getProyectosById(id : number): Observable<ProyectoDto>{
         return this.http.get<ProyectoDto>(`${this.baseUrl}${this.proyectosUrl}/${id}`);
     }

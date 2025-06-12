@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { TabsModule } from 'primeng/tabs';
 import { SelectItem } from 'primeng/api';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 import { MiembroService } from '../commons/services/MiembroService';
 import { Miembro } from '../commons/dto/Miembro';
@@ -22,18 +22,23 @@ import { ButtonModule } from 'primeng/button';
   styleUrl: './project-manager.component.scss'
 })
 
-export class ProjectManagerComponent {
+export class ProjectManagerComponent implements OnInit{
 
   miembros : Miembro[] = [];
   activeTabIndex: number = 0; 
   tareas : Tarea[] = [];
 
-  constructor(private miembrosService : MiembroService, private tareaService : TareaService){
+  constructor(
+    private miembrosService : MiembroService, 
+    private tareaService : TareaService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ){
     this.tareaService.getTareas().subscribe(tareas=>{
       this.tareas = tareas;
       console.log(this.tareas)
     })
   }
 
-  
+  ngOnInit(): void {
+  }
 }

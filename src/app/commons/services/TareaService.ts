@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { Tarea } from '../dto/Tarea';
+import { TareaDto } from '../dto/TareaDto';
 
 @Injectable({
     providedIn: 'root'
@@ -17,9 +18,9 @@ export class TareaService {
         return this.http.get<Tarea[]>(`${this.baseUrl}${this.tareasUrl}`);
     }
 
-    // createEvento(dto: EventoDto): Observable<any> {
-    //     return this.http.post<any>(`${this.baseUrl}${this.eventosUrl}`, dto);
-    // }
+    createTarea(dto: TareaDto): Observable<any> {
+        return this.http.post<any>(`${this.baseUrl}${this.tareasUrl}`, dto);
+    }
 
 
     // updateEvento(id:number, dto:EventoDto): Observable<any>{

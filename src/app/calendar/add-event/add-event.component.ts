@@ -37,6 +37,10 @@ export class AddEventComponent {
 
   ngOnInit(){
     this.currentDateSelected = this.config.data;
+
+    let newDate = new Date(this.currentDateSelected);
+    newDate.setMinutes(newDate.getMinutes() + 1); // Suma 1 minuto a la copia
+    this.currentDateSelected = newDate;
     console.log(this.currentDateSelected)
   }
 

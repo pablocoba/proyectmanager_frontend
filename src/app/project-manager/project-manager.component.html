@@ -1,14 +1,16 @@
 <div class="title">
     <i class="pi pi-folder" style="font-size:3rem;"></i>
-    <h1>Tareas</h1>
+    <h1 class="mb-5">Tareas</h1>
 </div>
 
-<p-button>
+
+<div>
     <app-tarjeta-tarea 
-    *ngFor="let tarea of tareas; let i = index"
-    [tareaData]="tarea"
-    [index]="i"
+        *ngFor="let tarea of tareas; let i = index"
+        [tareaData]="tarea"
+        [index]="i"
     ></app-tarjeta-tarea>
-</p-button>
-
-
+</div>
+<ng-template #noTarea>
+    caca
+</ng-template>
