@@ -39,6 +39,7 @@ import { ProyectoDto } from '../commons/dto/ProyectoDto';
 export class HeaderComponent implements OnInit {
 
   visible: boolean = true;
+  chatVisibility:boolean = true;
   @Output() sidebarStateChange = new EventEmitter<boolean>();
 
   user !: UserToken;
@@ -129,6 +130,20 @@ export class HeaderComponent implements OnInit {
       this.visible = true;
       this.sidebarStateChange.emit(this.visible)
     }
+  }
+  onChatbarChange(){
+    if(this.chatVisibility === true){
+      this.chatVisibility = false
+      this.sidebarStateChange.emit(this.chatVisibility)
+    }
+    else{
+      this.chatVisibility = true;
+      this.sidebarStateChange.emit(this.chatVisibility)
+    }
+  }
+
+  openDocumentos(){
+
   }
 
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { AddEventComponent } from './add-event/add-event.component';
 import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AlertService } from '../commons/services/AlertService';
@@ -27,6 +27,7 @@ import { ViewEventComponent } from './view-event/view-event.component';
     ButtonModule,
     TitleTruncatePipe
   ],
+  changeDetection:ChangeDetectionStrategy.OnPush,
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
   providers: [
@@ -111,10 +112,9 @@ export class CalendarComponent implements OnInit{
   }
 
   async ngOnInit(){
-    this.displayedDays = this.generateCalendarDays()
+    this.currentDateSelected = new Date()
     await this.loadEventos()
-    await this.mapEventsToDisplayedDays()
-    this.checkTodayEvent()
+    this.updateCalendarView();
   }
 
   //abre el diálogo de añadir evento y le pasa los datos.
@@ -151,8 +151,7 @@ export class CalendarComponent implements OnInit{
           await this.loadEventos();
           this.hasEvent = true;
           this.checkTodayEvent();
-          this.updateCurrentDayEventState();
-          this.mapEventsToDisplayedDays();
+          this.updateCalendarView();
           this.cdr.detectChanges();
         }
         catch(error){
@@ -193,61 +192,34 @@ export class CalendarComponent implements OnInit{
 
       await this.loadEventos(); 
       this.hasEvent = false; 
-      this.checkTodayEvent();
-      this.updateCurrentDayEventState();
-      this.mapEventsToDisplayedDays();
+      this.updateCalendarView();
 
     } catch (error) {
       console.error("Error al cargar eventos tras cerrar diálogo:", error);
     }
   });
 
-
-
   }
 
-  //pasa al día siguiente
-  next(){
-    const oldDate = new Date(this.currentDateSelected);
-    let newFecha = new Date(oldDate);
-    newFecha.setDate(oldDate.getDate() + 1);
-    this.currentDateSelected = newFecha;
-    this.checkTodayEvent();
-  }
-  //pasa al día anterior
-  previous(){
-    const oldDate = new Date(this.currentDateSelected);
-    let newFecha = new Date(oldDate);
-    newFecha.setDate(oldDate.getDate() - 1);
-    this.currentDateSelected = newFecha;
-    this.checkTodayEvent()
 
-  }
+  next(): void {
+  this.currentDateSelected.setDate(this.currentDateSelected.getDate() + 1);
+  this.updateCalendarView(); // <--- LLAMADA A LA FUNCIÓN CENTRAL
+}
 
-  nextBig(){
-    //cambia las fechas del calendario grande
-    let newOldestDate : CalendarDay;
-    newOldestDate = {fecha: new Date(this.displayedDays[this.displayedDays.length-1].fecha), event: null}
-    newOldestDate.fecha.setDate(newOldestDate.fecha.getDate()+1)
-    this.displayedDays.shift();
-    this.displayedDays.push(newOldestDate)
-    this.mapEventsToDisplayedDays();
-    this.currentMonthSelected = this.getMonthName(this.displayedDays[1].fecha); //cambia el mes
-    this.cdr.detectChanges();
-  }
-  previousBig(){
-    
-    //cambia las fechas del calendario grande 1 dia hacia atrás
-    let newNewestDate : CalendarDay;
-    newNewestDate = {fecha: new Date(this.displayedDays[0].fecha), event: null}
-    newNewestDate.fecha.setDate(newNewestDate.fecha.getDate()-1)
-    this.displayedDays.pop();
-    this.displayedDays.unshift(newNewestDate)
-    this.mapEventsToDisplayedDays();
-    this.currentMonthSelected = this.getMonthName(this.displayedDays[1].fecha); //cambia el mes
-    this.cdr.detectChanges();
-  }
+previous(): void {
+  this.currentDateSelected.setDate(this.currentDateSelected.getDate() - 1);
+  this.updateCalendarView(); // <--- LLAMADA A LA FUNCIÓN CENTRAL
+}
 
+nextBig(): void {
+    this.currentDateSelected.setDate(this.currentDateSelected.getDate() + 1); // O +N si quieres saltos grandes
+    this.updateCalendarView();
+}
+previousBig(): void {
+    this.currentDateSelected.setDate(this.currentDateSelected.getDate() - 1); // O -N si quieres saltos grandes
+    this.updateCalendarView();
+}
 
   //checkea si la fecha de hoy coincide con la fecha de algún evento.
   //TODO hay que hacer que recoja el array de los eventos de la base de datos y recorra las fechas para esto.
@@ -287,24 +259,40 @@ export class CalendarComponent implements OnInit{
 
   }
 
-  //metodo que genera 5 días para el calendario desktop en base al día de hoy
-  //genera ayer, hoy y los 3 días siguientes
-  generateCalendarDays(){
-    let dates : CalendarDay[] = [];
-    let yesterday : CalendarDay = {fecha: new Date(this.todayDate), event: null};
-    let today : CalendarDay = {fecha: new Date(this.todayDate), event: null}
-    yesterday.fecha.setDate(this.todayDate.getDate()-1)
-    
-    dates.push(yesterday)
-    dates.push(today);
-    for(let i = 1; i < 4; i++){
-      let newDate : CalendarDay = {fecha:new Date(this.todayDate), event:null};
-      newDate.fecha.setDate(this.todayDate.getDate()+i)
-      dates.push(newDate)
+
+
+  private generateDisplayedDays(centerDate: Date): CalendarDay[] {
+    const days: CalendarDay[] = [];
+    const numDaysToShow = 5; // Siempre 5 días
+    const tempDate = new Date(centerDate); // Crear una copia para manipular
+
+    // Calcular el día de inicio para mostrar 5 días con centerDate como el 2º día (index 1)
+    tempDate.setDate(centerDate.getDate() - 1); // <--- Ajusta el día de inicio
+
+    for (let i = 0; i < numDaysToShow; i++) {
+        const currentDayDate = new Date(tempDate);
+        currentDayDate.setDate(tempDate.getDate() + i); // Asegura que se mueve correctamente
+
+        // Mapear el evento para el día actual (lógica de mapEventsToDisplayedDays integrada aquí)
+        let foundEvent: Evento | null = null;
+        for (let evento of this.eventos) {
+            const eventDate = new Date(evento.fecha);
+            if (this.isSameDay(currentDayDate, eventDate)) {
+                foundEvent = evento;
+                break;
+            }
+        }
+        days.push({ fecha: currentDayDate, event: foundEvent });
     }
-    this.currentMonthSelected = this.getMonthName(dates[1].fecha);
-    return dates;
-  }
+    return days;
+}
+
+private updateCalendarView(): void {
+    this.displayedDays = this.generateDisplayedDays(this.currentDateSelected); // Regenera los días
+    this.currentMonthSelected = this.getMonthName(this.currentDateSelected); // Actualiza el nombre del mes
+    this.checkTodayEvent(); // Revisa eventos para el día central
+    this.cdr.detectChanges(); // <--- FORZAR DETECCIÓN DE CAMBIOS por OnPush
+}
 
   async loadEventos() {
     try {
