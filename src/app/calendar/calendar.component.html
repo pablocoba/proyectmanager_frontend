@@ -1,5 +1,6 @@
 <section class="calendar">
 
+    <!-- Calendario móvil -->
     <div class="lg:hidden m-auto">
         <div class="flex flex-row justify-center">
             <h1 class="font-bold text-center ml[-10px] lg:ml-0"><i class="pi pi-calendar pr-3"
@@ -30,13 +31,16 @@
         </div>
     </div>
 
+    <!-- Calendario grande -->
     <div class="hidden lg:flex flex-col align-middle max-w-full">
         <div class="arrow-buttons px-5 py-3 pb-5 flex flex-row justify-between max-w-full">
             <p-button (click)="previousBig()" icon="pi pi-angle-left" rounded="true" size="small"></p-button>
             <h2 class="text-2xl font-bold"><i class="pi pi-calendar pr-3" style="font-size:1.5rem;"></i>Calendario</h2>
             <p-button (click)="nextBig()" icon="pi pi-angle-right" rounded="true" size="small"></p-button>
         </div>
-        <h3 class="text-xl font-bold">{{currentMonthSelected}}</h3>
+        <div class="m-2 flex flex-row justify-end">
+            <h3 class="text-xl text-right font-bold px-2.5 py-1 dark:text-sky-500 text-sky-600 border-5 border-double rounded-lg">{{currentMonthSelected}} - {{currentDateSelected.getFullYear()}}</h3>
+        </div>
         <div class="flex flex-row gap-2">
             <div *ngFor="let day of displayedDays">
                 <div class="m-auto">

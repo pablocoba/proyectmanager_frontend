@@ -1,11 +1,12 @@
-<main>
+<main class="bg-slate-100 dark:bg-[#1C1B22] h-screen">
   <ng-container *ngIf="authService.isAuthenticated()">
     <app-header class="z-90"></app-header>
     <section class="main-content">
-      <div class="border-1 rounded-2xl p-5 lg:mx-[20%] m-5 dark:shadow-inner shadow-gray-500 max-h-[370px] overflow-y-hidden">
+      <div class="border-1 rounded-2xl p-5 lg:mx-[20%] m-5 dark:shadow-inner shadow-gray-500 max-h-[375px] overflow-y-hidden bg-white dark:bg-gray-900 relative">
         <app-project-manager></app-project-manager>
+        <div class="absolute inset-x-0 bottom-0 dark:h-30 h-40 bg-gradient-to-t dark:from-neutral-950 from-white to-transparent pointer-events-none rounded-sm"></div>
       </div>
-      <div class="dark:shadow-inner shadow-gray-500/80 flex flex-col lg:flex-row justify-center border-1 rounded-2xl lg:p-5 px-7 m-5 lg:mx-[20%] py-5">
+      <div class="dark:shadow-inner shadow-gray-500/80 flex flex-col lg:flex-row justify-center border-1 rounded-2xl lg:p-5 px-7 m-5 lg:mx-[20%] py-5 bg-white dark:bg-gray-900">
         <app-calendar></app-calendar>
       </div>
     </section>

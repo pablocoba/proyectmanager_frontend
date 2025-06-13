@@ -25,10 +25,17 @@ export class AuthService {
     }
     logout(): void {
         if (isPlatformBrowser(this.platformId)) {
-            this.router.navigate(['/login']);
-            localStorage.removeItem('authToken');
-            console.log('Sesión cerrada. Token eliminado.');
-        }
+        // 1. Eliminar el token y cualquier otra información de sesión del localStorage
+        localStorage.removeItem('authToken');
+        console.log('Sesión cerrada. Token eliminado.');
+
+        // 2. Redirigir al usuario a la página de login
+        this.router.navigate(['/login'], { replaceUrl: true }).then(() => {
+            // window.location.reload();
+        }).catch(error => {
+            console.error('Error durante la redirección al login:', error);
+        });
+    }
     }
 
     login(token: string): void {

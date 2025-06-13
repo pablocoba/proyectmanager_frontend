@@ -1,7 +1,49 @@
-<form [formGroup]="loginForm" (ngSubmit)="onLogin()">
-        <div class="flex flex-col gap-3 p-3 bg-sky-500 max-w-100 m-auto items-center">
-            <input pInputText class="mr-auto rounded-md" id="username" formControlName="username" placeholder="Nombre de usuario"/>
-            <p-password class="mr-auto rounded-md" formControlName="password" placeholder="Contraseña" [feedback]="false" />
-            <p-button type="submit" label="Iniciar Sesión"></p-button>
-        </div>
-</form> 
+<div class="hidden lg:flex min-h-screen items-center justify-center bg-slate-100 dark:bg-[#1C1B22]">
+    <div class="w-full max-w-md p-8 space-y-6 rounded-lg shadow-xl border bg-white dark:bg-[#1C1B22]">
+        <h2 class="text-3xl font-bold text-center">Iniciar Sesión</h2>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="space-y-5">
+            <div>
+                <label for="username" class="block text-sm font-medium mb-1">Nombre de usuario</label>
+                <input pInputText id="username" formControlName="username" placeholder="Tu nombre de usuario"
+                    class="w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 transition duration-150 ease-in-out" />
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium mb-1">Contraseña</label>
+                <p-password id="password" formControlName="password" placeholder="Tu contraseña" [feedback]="false"
+                    inputStyleClass="w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 transition duration-150 ease-in-out"
+                    toggleMask="true"></p-password>
+            </div>
+
+            <p-button type="submit" label="Iniciar Sesión"
+                styleClass="w-full py-2 px-4 rounded-md focus:ring-offset-2 focus:ring-2 focus:outline-none transition duration-150 ease-in-out"></p-button>
+            <p class="text-center text-sm mt-6 dark:text-sky-400">Project Manager</p>
+        </form>
+    </div>
+</div>
+<div class="lg:hidden flex min-h-screen items-center pb-35 justify-center p-4 bg-slate-100 dark:bg-[#1C1B22]">
+    <div class="w-full p-8 space-y-6 rounded-lg shadow-xl border bg-white dark:bg-[#1C1B22]">
+        <h2 class="text-3xl font-bold text-center">Iniciar Sesión</h2>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="space-y-5">
+            <div>
+                <label for="username" class="block text-sm font-medium mb-1">Nombre de usuario</label>
+                <input pInputText id="username" formControlName="username" placeholder="Tu nombre de usuario"
+                    class="w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 transition duration-150 ease-in-out" />
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium mb-1">Contraseña</label>
+                <p-password id="password" formControlName="password" placeholder="Tu contraseña" [feedback]="false"
+                    class="w-full"
+                    inputStyleClass="w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 transition duration-150 ease-in-out"
+                    toggleMask="true"></p-password>
+            </div>
+
+            <p-button type="submit" label="Iniciar Sesión"
+                styleClass="w-full py-2 px-4 rounded-md focus:ring-offset-2 focus:ring-2 focus:outline-none transition duration-150 ease-in-out"></p-button>
+            <p class="text-center text-sm mt-6 dark:text-sky-400">Project Manager</p>
+            </form>
+    </div>
+</div>
