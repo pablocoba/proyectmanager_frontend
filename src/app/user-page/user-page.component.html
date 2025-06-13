@@ -2,7 +2,7 @@
   <ng-container *ngIf="authService.isAuthenticated()">
     <app-header class="z-90"></app-header>
     <section class="main-content">
-      <div class="border-1 rounded-2xl p-5 lg:mx-[20%] m-5 dark:shadow-inner shadow-gray-500">
+      <div class="border-1 rounded-2xl p-5 lg:mx-[20%] m-5 dark:shadow-inner shadow-gray-500 max-h-[370px] overflow-y-hidden">
         <app-project-manager></app-project-manager>
       </div>
       <div class="dark:shadow-inner shadow-gray-500/80 flex flex-col lg:flex-row justify-center border-1 rounded-2xl lg:p-5 px-7 m-5 lg:mx-[20%] py-5">

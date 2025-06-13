@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { TabsModule } from 'primeng/tabs';
 import { SelectItem } from 'primeng/api';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { CommonModule, isPlatformBrowser, SlicePipe } from '@angular/common';
 
 import { MiembroService } from '../commons/services/MiembroService';
 import { Miembro } from '../commons/dto/Miembro';
@@ -16,7 +16,8 @@ import { ButtonModule } from 'primeng/button';
     TabsModule,
     CommonModule,
     TarjetaTareaComponent,
-    ButtonModule
+    ButtonModule,
+    SlicePipe
   ],
   templateUrl: './project-manager.component.html',
   styleUrl: './project-manager.component.scss'

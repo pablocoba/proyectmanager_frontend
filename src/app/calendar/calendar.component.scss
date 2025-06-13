@@ -9,7 +9,6 @@
         display:flex;
         flex-direction: row;
         justify-content: space-between;
-
     }
 
     .calendar{
@@ -19,11 +18,11 @@
 
 }
 
-::ng-deep{
+/* ::ng-deep{
     .arrow-buttons{
         .p-button{
             border-radius:999px !important;
             padding:.25rem !important;
         }
     }
-}
+} */

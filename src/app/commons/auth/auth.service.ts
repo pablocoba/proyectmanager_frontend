@@ -25,8 +25,8 @@ export class AuthService {
     }
     logout(): void {
         if (isPlatformBrowser(this.platformId)) {
-            localStorage.removeItem('authToken');
             this.router.navigate(['/login']);
+            localStorage.removeItem('authToken');
             console.log('Sesión cerrada. Token eliminado.');
         }
     }

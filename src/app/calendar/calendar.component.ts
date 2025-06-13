@@ -223,25 +223,26 @@ export class CalendarComponent implements OnInit{
     this.checkTodayEvent()
 
   }
-  
+
   nextBig(){
-    //cambia las fechas del calendario grande 1 dia hacia atrás
-    let newNewestDate : CalendarDay;
-    newNewestDate = {fecha: new Date(this.displayedDays[0].fecha), event: null}
-    newNewestDate.fecha.setDate(newNewestDate.fecha.getDate()-1)
-    this.displayedDays.pop();
-    this.displayedDays.unshift(newNewestDate)
-    this.mapEventsToDisplayedDays();
-    this.currentMonthSelected = this.getMonthName(this.displayedDays[1].fecha); //cambia el mes
-    this.cdr.detectChanges();
-  }
-  previousBig(){
     //cambia las fechas del calendario grande
     let newOldestDate : CalendarDay;
     newOldestDate = {fecha: new Date(this.displayedDays[this.displayedDays.length-1].fecha), event: null}
     newOldestDate.fecha.setDate(newOldestDate.fecha.getDate()+1)
     this.displayedDays.shift();
     this.displayedDays.push(newOldestDate)
+    this.mapEventsToDisplayedDays();
+    this.currentMonthSelected = this.getMonthName(this.displayedDays[1].fecha); //cambia el mes
+    this.cdr.detectChanges();
+  }
+  previousBig(){
+    
+    //cambia las fechas del calendario grande 1 dia hacia atrás
+    let newNewestDate : CalendarDay;
+    newNewestDate = {fecha: new Date(this.displayedDays[0].fecha), event: null}
+    newNewestDate.fecha.setDate(newNewestDate.fecha.getDate()-1)
+    this.displayedDays.pop();
+    this.displayedDays.unshift(newNewestDate)
     this.mapEventsToDisplayedDays();
     this.currentMonthSelected = this.getMonthName(this.displayedDays[1].fecha); //cambia el mes
     this.cdr.detectChanges();

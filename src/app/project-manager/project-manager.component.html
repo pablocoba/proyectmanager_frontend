@@ -1,16 +1,27 @@
-<div class="title">
+<section class="relative">
+    <div class="title">
     <i class="pi pi-folder" style="font-size:3rem;"></i>
     <h1 class="mb-5">Tareas</h1>
 </div>
 
 
-<div>
+<div class="grid-cols-1 lg:grid-cols-4 gap-4 hidden lg:grid">
     <app-tarjeta-tarea 
-        *ngFor="let tarea of tareas; let i = index"
+        *ngFor="let tarea of tareas | slice:0:12 ; let i = index"
         [tareaData]="tarea"
         [index]="i"
     ></app-tarjeta-tarea>
+    <div class="absolute inset-x-0 bottom-0 h-50 bg-gradient-to-t dark:from-neutral-950 from-white to-transparent pointer-events-none rounded-sm"></div>
+</div>
+<div class="grid grid-cols-1 gap-4 shadow-xl lg:hidden ">
+    <app-tarjeta-tarea 
+        *ngFor="let tarea of tareas | slice:0:5; let i = index"
+        [tareaData]="tarea"
+        [index]="i"
+    ></app-tarjeta-tarea>
+    <div class="absolute inset-x-0 bottom-0 h-50 bg-gradient-to-t dark:from-neutral-950 from-white to-transparent pointer-events-none rounded-sm"></div>
 </div>
 <ng-template #noTarea>
     caca
 </ng-template>
+</section>
