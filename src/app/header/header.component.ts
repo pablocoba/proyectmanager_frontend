@@ -12,10 +12,12 @@ import { Drawer, DrawerModule } from 'primeng/drawer';
 import { AvatarModule } from 'primeng/avatar';
 import { AvatarGroupModule } from 'primeng/avatargroup';
 import { RippleModule } from 'primeng/ripple';
-import { isPlatformBrowser } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Proyecto } from '../commons/dto/Proyecto';
 import { ProyectoService } from '../commons/services/ProyectoService';
 import { ProyectoDto } from '../commons/dto/ProyectoDto';
+import { ChatComponent } from '../chat/chat.component';
+import { StyleClassModule } from 'primeng/styleclass';
 
 @Component({
   selector: 'app-header',
@@ -25,7 +27,10 @@ import { ProyectoDto } from '../commons/dto/ProyectoDto';
     DrawerModule,
     AvatarModule,
     AvatarGroupModule,
-    RippleModule
+    RippleModule,
+    ChatComponent,
+    StyleClassModule,
+    CommonModule
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
@@ -40,6 +45,7 @@ export class HeaderComponent implements OnInit {
 
   visible: boolean = true;
   chatVisibility:boolean = true;
+  projectsMenuOpen: boolean = false;
   @Output() sidebarStateChange = new EventEmitter<boolean>();
 
   user !: UserToken;
@@ -131,6 +137,7 @@ export class HeaderComponent implements OnInit {
       this.sidebarStateChange.emit(this.visible)
     }
   }
+
   onChatbarChange(){
     if(this.chatVisibility === true){
       this.chatVisibility = false
@@ -142,6 +149,16 @@ export class HeaderComponent implements OnInit {
     }
   }
 
+  toggleProjectsMenu(){
+    if(this.projectsMenuOpen === true){
+      this.projectsMenuOpen = false
+      this.sidebarStateChange.emit(this.projectsMenuOpen)
+    }
+    else{
+      this.projectsMenuOpen = true;
+      this.sidebarStateChange.emit(this.projectsMenuOpen)
+    }
+  }
   openDocumentos(){
 
   }

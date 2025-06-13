@@ -36,7 +36,6 @@ export class ProjectManagerComponent implements OnInit{
   ){
     this.tareaService.getTareas().subscribe(tareas=>{
       this.tareas = tareas;
-      console.log(this.tareas)
     })
   }
 

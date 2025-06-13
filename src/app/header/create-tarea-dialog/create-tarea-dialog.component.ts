@@ -66,7 +66,7 @@ export class CreateTareaDialogComponent implements OnInit{
       if (this.usernameToFilter) { // Solo si tenemos un username para filtrar
         this.miembros = this.miembros.filter(miembro => {
           // Asegúrate de que miembro y miembro.nombreUsuario existen
-          if (miembro && typeof miembro.nombreUsuario === 'string' && miembro.id !== undefined) {
+          if (miembro && typeof miembro.nombreUsuario === 'string' && miembro.idMiembro !== undefined) {
             // Realiza la comparación
             return miembro.nombreUsuario.toLowerCase().includes(this.usernameToFilter);
           }

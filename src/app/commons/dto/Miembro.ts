@@ -1,5 +1,5 @@
 export interface Miembro {
-    id : number,
+    idMiembro : number,
     nombreUsuario : string,
     correo : string,
     contrasena : string,

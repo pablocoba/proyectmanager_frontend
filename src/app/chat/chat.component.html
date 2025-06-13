@@ -1,0 +1,67 @@
+<div class="flex flex-col gap-3">
+    <div *ngIf="mensajes.length === 0 || !mensajes else activeChat">
+        <div class="empty-state text-center p-6 rounded-lg bg-zinc-100 dark:bg-gray-800 mb-3">
+            <i class="pi pi-comments text-5xl text-gray-400 mb-4"></i>
+            <h3 class="text-xl font-medium text-gray-700 dark:text-gray-200">¡Sé el primero en comentar!</h3>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">Inicia la conversación en este proyecto</p>
+        </div>
+        <form [formGroup]="chatForm" (ngSubmit)="sendMessage()">
+            <div class="flex flex-row gap-2 items-start justify-center bg-zinc-800 p-1.5 rounded-md">
+                <textarea pTextarea formControlName="mensaje" class="w-full" pSize="small" [autoResize]="true" rows="1"
+                    placeholder="Escribe tu mensaje..."></textarea>
+                <p-button class="mr-0.5 mt-0.5" icon="pi pi-send" rounded="true" size="small" type="submit"
+                    [disabled]="!chatForm.get('mensaje')?.value"></p-button>
+            </div>
+        </form>
+    </div>
+    <ng-template #activeChat>
+        <div #messagesContainer class="empty-state text-center p-2 py-1 rounded-lg bg-zinc-100 dark:bg-gray-800 mensajes-container max-h-[500px] overflow-y-auto">
+            <div *ngFor="let mensaje of mensajes; let i = index">
+                <!-- Separador de fecha -->
+                <div *ngIf="isNewDay(i)" class="flex justify-center my-2">
+                    <span class="text-xs text-zinc-400 bg-zinc-800 px-2 py-1 rounded">
+                        {{ mensaje.fechaHora | date:'MMMM d, y' }} <!-- Ej: "June 13, 2025" -->
+                    </span>
+                </div>
+
+                <!-- Mensaje -->
+                <div class="px-3 py-2 bg-zinc-700 rounded-sm my-1.5">
+                    <div>
+                        <div class="mb-1">
+                            <div *ngIf="mensaje.nombreUsuario === user.username; else notMe"
+                                class="flex flex-row justify-between items-center">
+                                <h3 class="text-base font-bold text-start text-sky-500 mb-1">
+                                    {{ mensaje.nombreUsuario }}
+                                </h3>
+                                <p class="text-xs text-zinc-400">
+                                    {{ mensaje.fechaHora | date:'HH:mm' }}
+                                </p>
+                            </div>
+                            <ng-template #notMe>
+                                <div class="flex flex-row justify-between items-center"> 
+                                    <h3 class="text-base text-start font-bold mb-1">{{ mensaje.nombreUsuario }}</h3>
+                                    <p class="text-xs text-zinc-400">
+                                        {{ mensaje.fechaHora | date:'HH:mm' }}
+                                    </p>
+                                </div>
+
+                            </ng-template>
+                        </div>
+                        <div class="w-full relative">
+                            <p class="text-sm text-start text-left break-words">{{ mensaje.contenido }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form [formGroup]="chatForm" (ngSubmit)="sendMessage()">
+            <div class="flex flex-row gap-2 items-start justify-center bg-zinc-800 p-1.5 rounded-md">
+                <textarea pTextarea formControlName="mensaje" class="w-full" pSize="small" [autoResize]="true" rows="1"
+                    placeholder="Escribe tu mensaje..."></textarea>
+                <p-button class="mr-0.5 mt-0.5" icon="pi pi-send" rounded="true" size="small" type="submit"
+                    [disabled]="!chatForm.get('mensaje')?.value"></p-button>
+            </div>
+        </form>
+    </ng-template>
+</div>

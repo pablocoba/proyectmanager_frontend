@@ -15,7 +15,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // Protege el acceso a localStorage con isPlatformBrowser
   if (isPlatformBrowser(platformId)) {
     authToken = localStorage.getItem('authToken');
-    console.log('🔄 Interceptor ejecutado (cliente) - Token:', authToken ? authToken : 'No hay token');
+    // console.log('🔄 Interceptor ejecutado (cliente) - Token:', authToken ? authToken : 'No hay token');
   } else {
     // Si estamos en el servidor, no hay token de localStorage para adjuntar.
     // console.log('🔄 Interceptor ejecutado (servidor) - No hay localStorage');

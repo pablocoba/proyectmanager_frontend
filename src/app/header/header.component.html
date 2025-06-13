@@ -1,29 +1,65 @@
 <header>
     <nav>
         <ul class="flex flex-row lg:gap-1 lg:align-center justify-between lg:justify-start p-5">
-            <p-drawer #drawerRef [(visible)]="visible" position="left" [modal]="false" >
+            <p-drawer #drawerRef [(visible)]="visible" position="left" [modal]="false">
                 <ng-template #headless>
                     <div class="flex flex-col h-full">
                         <div class="flex flex-row justify-between px-4 pt-4">
-                            <p class="font-semibold text-2xl pt-1 pl-3 text-primary">{{currentProject.nombre}}</p>
-                            <p-button type="button" (click)="onSidebarChange()" icon="pi pi-times" rounded="true" outlined="true" styleClass="h-8 w-8"></p-button>
+                            <div class="flex flex-row items-start">
+                                <i class="pi pi-folder p-3" style="font-size:1.75rem"></i>
+                                <p class="font-semibold text-2xl pt-1 pl-3 text-primary">{{currentProject.nombre}}</p>
+                            </div>
+                            <p-button type="button" (click)="onSidebarChange()" icon="pi pi-times" rounded="true"
+                                outlined="true" styleClass="h-8 w-8"></p-button>
                         </div>
                         <div class="overflow-y-auto">
-                            <ul class="list-none p-4 m-0">    
+                            <ul class="list-none p-4 m-0">
                                 <li>
-                                    <a pRipple class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                    <a pRipple pStyleClass="@next" enterFromClass="hidden"
+                                        enterActiveClass="animate-slidedown" leaveToClass="hidden"
+                                        leaveActiveClass="animate-slideup" (click)="toggleProjectsMenu()"
+                                        [class.active]="projectsMenuOpen"
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                        <i class="pi pi-folder mr-2"></i>
+                                        <span class="font-medium">Proyectos</span>
+                                        <i class="pi pi-chevron-down ml-auto transition-transform duration-300"
+                                            [class.rotate-180]="projectsMenuOpen"></i>
+                                    </a>
+                                    <ul [class.hidden]="!projectsMenuOpen"
+                                        class="list-none py-0 pl-4 pr-0 m-0 overflow-y-hidden transition-all duration-[400ms] ease-in-out">
+                                        <li>
+                                            <div *ngFor="let proyecto of proyectos" >
+                                                <a *ngIf="proyecto.idProyecto !== this.currentProject.idProyecto else curProject" pRipple class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                                    <span class="font-medium">{{proyecto.nombre}}</span>
+                                                </a>
+                                                <ng-template #curProject>
+                                                    <a pRipple class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                                        <i class="pi pi-reply pr-2 text-sky-500" style="font-size:.75rem"></i>
+                                                        <span class="font-medium text-sky-500">{{proyecto.nombre}}</span>
+                                                    </a>
+                                                </ng-template>
+                                            </div>
+                                            
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a pRipple
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
                                         <i class="pi pi-file-o mr-2"></i>
                                         <span class="font-medium">Documentos</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a pRipple class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                    <a pRipple
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
                                         <i class="pi pi-cog mr-2"></i>
                                         <span class="font-medium">Configuración de proyecto</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a (click)="onLogout()" pRipple class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                    <a (click)="onLogout()" pRipple
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
                                         <i class="pi pi-sign-out mr-2"></i>
                                         <span class="font-medium">Cerrar sesión</span>
                                     </a>
@@ -32,60 +68,62 @@
                         </div>
                         <div class="mt-auto">
                             <hr class="mb-4 mx-4 border-t border-0 border-surface" />
-                            <a pRipple class="m-4 flex items-center cursor-pointer p-4 gap-2 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
-                                <p-avatar image="https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png" shape="circle" />
+                            <a pRipple
+                                class="m-4 flex items-center cursor-pointer p-4 gap-2 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                <p-avatar image="https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png"
+                                    shape="circle" />
                                 <span class="font-bold pl-2">{{user.username}}</span>
                             </a>
                         </div>
                     </div>
                 </ng-template>
             </p-drawer>
-            <p-button (click)="onSidebarChange()" icon="pi pi-bars" class="sidebarMove ml-[-2%] lg:mt-0 mt-[4px]" link="true"/>
-            <li><h2 class="text-xl lg:pl-2 pt-[10px] text-center">Workflow Manager | <span class="text-sky-500">{{user.username}}</span></h2></li>
+            <p-button (click)="onSidebarChange()" icon="pi pi-bars" class="sidebarMove ml-[-2%] lg:mt-0 mt-[4px]"
+                link="true" />
             <li>
-                <p-button 
-                    (click)="menu.toggle($event)" 
-                    link="true" 
-                    icon="pi pi-plus"
-                    size="large">
+                <h2 class="text-xl lg:pl-2 pt-[10px] text-center">Workflow Manager | <span
+                        class="text-sky-500">{{user.username}}</span></h2>
+            </li>
+            <li>
+                <p-button (click)="menu.toggle($event)" link="true" icon="pi pi-plus" size="large">
                 </p-button>
             </li>
-            <p-drawer #drawerRef [(visible)]="chatVisibility" position="right" [modal]="false" >
+            <p-drawer #drawerRef [(visible)]="chatVisibility" position="right" [modal]="false">
                 <ng-template #headless>
                     <div class="flex flex-col h-full">
                         <div class="flex flex-row justify-between px-4 pt-4">
-                            <p class="font-semibold text-2xl pt-1 pl-3 text-primary"><i class="pi pi-comments pr-3" style="font-size: 1.2rem;"></i>Chat</p>
-                            <p-button type="button" (click)="onChatbarChange()" icon="pi pi-times" rounded="true" outlined="true" styleClass="h-8 w-8"></p-button>
+                            <p class="font-semibold text-2xl pt-1 pl-3 text-primary"><i class="pi pi-comments pr-3"
+                                    style="font-size: 1.2rem;"></i>Chat</p>
+                            <p-button type="button" (click)="onChatbarChange()" icon="pi pi-times" rounded="true"
+                                outlined="true" styleClass="h-8 w-8"></p-button>
+                        </div>
+                        <div class="p-6">
+                            <app-chat></app-chat>
                         </div>
                         <div class="overflow-y-auto">
-                            <ul class="list-none p-4 m-0">    
+                            <ul class="list-none p-4 m-0">
                                 <li>
-                                    <a pRipple class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                    <a pRipple
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
                                         <i class="pi pi-file-o mr-2"></i>
                                         <span class="font-medium">Documentos</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a pRipple class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                    <a pRipple
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
                                         <i class="pi pi-cog mr-2"></i>
                                         <span class="font-medium">Configuración de proyecto</span>
                                     </a>
                                 </li>
                             </ul>
                         </div>
-                        <div class="mt-auto">
-                            <hr class="mb-4 mx-4 border-t border-0 border-surface" />
-                            <a pRipple class="m-4 flex items-center cursor-pointer p-4 gap-2 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
-                                <p-avatar image="https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png" shape="circle" />
-                                <span class="font-bold pl-2">{{user.username}}</span>
-                            </a>
-                        </div>
                     </div>
                 </ng-template>
             </p-drawer>
         </ul>
-        
+
     </nav>
-<p-menu #menu [popup]="true" [model]="items"></p-menu>
+    <p-menu #menu [popup]="true" [model]="items"></p-menu>
 
 </header>

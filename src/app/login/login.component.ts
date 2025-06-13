@@ -67,7 +67,6 @@ export class LoginComponent implements OnInit{
       this.loginService.userLogIn(this.user).subscribe(
         (user: UserToken) => {
           // No hay problema con console.log en el navegador
-          console.log("user:",user);
 
           if (user && user.token) {
             localStorage.setItem('authToken', user.token);

@@ -52,12 +52,10 @@ export class TarjetaTareaComponent implements OnInit{
   ) {
     this.tareaService.getTareas().subscribe(tareas=>{
       this.tareas = tareas;
-      console.log(this.tareas)
     })
   }
   
   ngOnInit() {
-      console.log("tareaData: ", this.tareaData)
   }
 
 }

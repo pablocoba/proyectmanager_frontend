@@ -67,10 +67,8 @@ export class ViewEventComponent {
           proyecto:this.config.data.project
         }
 
-        console.log("eventoDto", eventoDto)
         this.eventoService.updateEvento(this.currentEvent.idEvento, eventoDto).subscribe({
           next: (evento) => {
-            console.log(evento)
             this.editMode = false;
             this.ref.close(true); // Cierra el diálogo y emite confirmación
           },
