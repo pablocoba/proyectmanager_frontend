@@ -166,7 +166,7 @@ export class CalendarComponent implements OnInit{
           fecha: event[3],
           descripcion: event[2]
         }
-
+        console.log("nuevoevento",newEvent)
         try{
           const createdEvento = await this.eventoService.createEvento(newEvent).toPromise();
           

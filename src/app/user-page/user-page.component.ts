@@ -11,12 +11,13 @@ import { ProyectoService } from '../commons/services/ProyectoService';
 import { MessageService } from 'primeng/api';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AlertService } from '../commons/services/AlertService';
-import { CreateProyectoComponent } from '../header/create-proyecto/create-proyecto.component';
+import { CreateProyectoComponent } from '../create-proyecto/create-proyecto.component';
 import { Subscription, take } from 'rxjs';
 import { MiembroDto } from '../commons/dto/MiembroDto';
 import { MiembroService } from '../commons/services/MiembroService';
 import { CreateProyectoDto } from '../commons/dto/CreateProyectoDto';
 import { ProyectoDto } from '../commons/dto/ProyectoDto';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-user-page',
@@ -24,7 +25,8 @@ import { ProyectoDto } from '../commons/dto/ProyectoDto';
     HeaderComponent,
     ProjectManagerComponent,
     CalendarComponent,
-    CommonModule
+    CommonModule,
+    ButtonModule
   ],
   providers:[
     AuthService,
@@ -47,6 +49,7 @@ export class UserPageComponent implements OnInit{
   ref: DynamicDialogRef | undefined;
   private dialogSubscription: Subscription | undefined; // Para gestionar la suscripción
   currentMember !: MiembroDto;
+  tareasAmpliado : boolean = false;
 
   nuevoProyecto : CreateProyectoDto = {
     nombre: "prueba",
@@ -207,6 +210,15 @@ export class UserPageComponent implements OnInit{
           }
         });
       }
+    }
+  }
+
+  ampliarTareas(){
+    if(this.tareasAmpliado){
+      this.tareasAmpliado = false;
+    }
+    else{
+      this.tareasAmpliado = true;
     }
   }
 }

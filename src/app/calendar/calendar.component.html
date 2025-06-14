@@ -1,4 +1,4 @@
-<section class="calendar">
+<section class="calendar relative">
 
     <!-- Calendario móvil -->
     <div class="lg:hidden m-auto">
@@ -32,29 +32,33 @@
     </div>
 
     <!-- Calendario grande -->
-    <div class="hidden lg:flex flex-col align-middle max-w-full">
-        <div class="arrow-buttons px-5 py-3 pb-5 flex flex-row justify-between max-w-full">
+    <div class="hidden lg:flex flex-col h-full w-full">
+        <div class="arrow-buttons px-5 py-3 pb-5 flex flex-row justify-between">
             <p-button (click)="previousBig()" icon="pi pi-angle-left" rounded="true" size="small"></p-button>
             <h2 class="text-2xl font-bold"><i class="pi pi-calendar pr-3" style="font-size:1.5rem;"></i>Calendario</h2>
             <p-button (click)="nextBig()" icon="pi pi-angle-right" rounded="true" size="small"></p-button>
         </div>
         <div class="m-2 flex flex-row justify-end">
-            <h3 class="text-xl text-right font-bold px-2.5 py-1 dark:text-sky-500 text-sky-600 border-5 border-double rounded-lg">{{currentMonthSelected}} - {{currentDateSelected.getFullYear()}}</h3>
+            <h3
+                class="text-xl text-right font-bold px-2.5 py-1 dark:text-sky-500 text-sky-600 border-5 border-double rounded-lg">
+                {{currentMonthSelected}} - {{currentDateSelected.getFullYear()}}</h3>
         </div>
-        <div class="flex flex-row gap-2">
-            <div *ngFor="let day of displayedDays">
-                <div class="m-auto">
+        <div class="flex flex-row gap-2 flex-grow">
+            <div *ngFor="let day of displayedDays" class="flex-grow">
+                <div class="h-full flex flex-col">
                     <span class="block text-center p-3">{{ weekDayName(day.fecha) }}</span>
-                    <div class="bg-sky-500 border-2 rounded-md dark:border-black border-sky-400">
+                    <div class="bg-sky-500 border-2 rounded-md dark:border-black border-sky-400 h-full flex flex-col">
                         <p class="text-right p-3 text-lg">{{day.fecha | date:'dd'}}</p>
-                        <div class="flex flex-row justify-center">
+                        <div class="flex flex-col flex-grow justify-center">
                             <div *ngIf="day.event === null"
-                                class="border-dashed border-2 rounded-md lg:m-3 h-[70%] p-5 m-1 min-w-40 max-w-40"
+                                class="border-dashed border-2 rounded-md lg:m-3 p-5 m-1 flex-grow cursor-pointer"
                                 (click)="showAddEventDialog(day.fecha)">
-                                <i class="pi pi-plus"></i> Nuevo Evento
+                                <div class="h-full flex items-center justify-center">
+                                    <i class="pi pi-plus"></i> Nuevo Evento
+                                </div>
                             </div>
                             <div *ngIf="day.event !== null"
-                                class="p-5 lg:m-3 dark:bg-gray-900 bg-sky-400 rounded-md m-2 min-w-40"
+                                class="p-5 lg:m-3 dark:bg-gray-900 bg-sky-400 rounded-md m-2 flex-grow cursor-pointer"
                                 (click)="showEventDialog(day)">
                                 <h3 class="text-xl font-bold">{{day.event.titulo | titleTruncate}}</h3>
                                 <p class="max-w-50">{{day.event.descripcion | descTruncate}}</p>
@@ -64,5 +68,6 @@
                 </div>
             </div>
         </div>
+        
     </div>
 </section>

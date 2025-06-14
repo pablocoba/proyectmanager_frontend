@@ -15,6 +15,7 @@ import { CreateTareaDialogComponent } from '../header/create-tarea-dialog/create
 import { Subscription } from 'rxjs';
 import { CheckboxModule } from 'primeng/checkbox';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-tarjeta-tarea',
@@ -26,7 +27,8 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
     ButtonModule,
     CheckboxModule,
     ReactiveFormsModule,
-    TareaTitleTruncatePipe
+    TareaTitleTruncatePipe,
+    CommonModule
   
   ],
   templateUrl: './tarjeta-tarea.component.html',
@@ -43,6 +45,7 @@ export class TarjetaTareaComponent implements OnInit{
   tareas : Tarea[] = [];
   @Input() tareaData !: Tarea;
   @Input() index : any;
+  @Input() tamano : boolean | null = null;
 
   tarjetaTareaForm: FormGroup = new FormGroup({
     check: new FormControl(null, [Validators.required]),

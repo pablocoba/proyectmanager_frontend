@@ -1,9 +1,12 @@
+
 .title{
     display:flex;
     gap: 1rem;
     max-width:60;
     justify-content: center;;
 }
+
+
 ::ng-deep{
     p-tabs{
         max-width:70%;

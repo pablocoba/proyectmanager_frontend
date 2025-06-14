@@ -13,14 +13,7 @@
         [index]="i"
     ></app-tarjeta-tarea>
 </div>
-<div class="grid grid-cols-1 gap-4 shadow-xl lg:hidden ">
-    <app-tarjeta-tarea 
-        *ngFor="let tarea of tareas | slice:0:5; let i = index"
-        [tareaData]="tarea"
-        [index]="i"
-    ></app-tarjeta-tarea>
 
-</div>
 </div>
 <ng-template #noTarea>
     <div class="border-2 border-dashed lg:p-15 lg:mx-[30%] p-10 text-center gap-7 rounded-lg flex flex-col justify-center p-5 items-center">
@@ -29,7 +22,6 @@
     </div>
 </ng-template>
 </section>
-
 <!-- sombrita  -->
-<div *ngIf="tareas.length >= 5" class="absolute inset-x-0 bottom-0 h-50 bg-gradient-to-t dark:from-neutral-950 from-white to-transparent pointer-events-none rounded-sm"></div>
+<!-- <div *ngIf="tareas.length >= 5" class="absolute inset-x-0 bottom-0 h-50 bg-gradient-to-t dark:from-neutral-950 from-white to-transparent pointer-events-none rounded-sm"></div> -->
 

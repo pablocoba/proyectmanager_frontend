@@ -8,10 +8,15 @@ export const routes: Routes = [
         title: 'Login'
     },
     {
+        path: 'docs',
+        loadComponent: () => import('./documentos/documentos.component').then(m => m.DocumentosComponent),
+        title: 'Docs'
+    },
+    {
         path: 'user',
         loadComponent: () => import('./user-page/user-page.component').then(m => m.UserPageComponent),
         canActivate: [authGuard],
-        title: 'User Dashboard'
+        title: 'Workflow Manager'
     },
     {
         path: '',

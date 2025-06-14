@@ -29,6 +29,8 @@ import { UserToken } from '../commons/dto/UserToken';
 
 export class ProjectManagerComponent implements OnInit{
   @Input() proyectoActual: number | null = null;
+  @Input() tamano: boolean | null = null;
+  
   miembros : Miembro[] = [];
   activeTabIndex: number = 0; 
   tareas : Tarea[] = [];

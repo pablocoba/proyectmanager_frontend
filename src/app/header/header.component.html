@@ -41,9 +41,11 @@
                                                     <span class="font-medium">{{proyecto.nombreProyecto}}</span>
                                                 </a>
                                                 <ng-template #curProject>
-                                                    <a pRipple class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple transition">
-                                                        <i class="pi pi-reply pr-2 text-sky-500" style="font-size:1rem"></i>
-                                                        <span class="text-md font-medium text-sky-500">{{proyecto.nombreProyecto}}</span>
+                                                    <a pRipple class="flex justify-between items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple transition">
+                                                        <div>
+                                                            <i class="pi pi-reply pr-2 text-sky-500" style="font-size:1rem"></i>
+                                                            <span class="text-md font-medium text-sky-500">{{proyecto.nombreProyecto}}</span>
+                                                        </div>
                                                     </a>
                                                 </ng-template>
                                             </div>
@@ -52,7 +54,7 @@
                                     </ul>
                                 </li>
                                 <li>
-                                    <a pRipple
+                                    <a pRipple (click)="toDocuments()"
                                         class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
                                         <i class="pi pi-file-o mr-2"></i>
                                         <span class="font-medium">Documentos</span>
@@ -87,7 +89,7 @@
                 <p-button (click)="menu.toggle($event)" link="true" icon="pi pi-plus" size="large">
                 </p-button>
             </li>
-            <p-drawer *ngIf="proyectosUsuario && proyectosUsuario.length > 0" #drawerRef [(visible)]="visible" [(visible)]="chatVisibility" position="right" [modal]="false">
+            <p-drawer *ngIf="proyectosUsuario && proyectosUsuario.length > 0" #drawerRef [(visible)]="chatVisibility" position="right" [modal]="false">
                 <ng-template #headless>
                     <div class="flex flex-col h-full">
                         <div class="flex flex-row justify-between px-6 pt-6">

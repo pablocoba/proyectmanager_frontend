@@ -50,7 +50,7 @@ export class AddEventComponent {
   }
   onEventAdded(){
     this.hasEvent = true;
-    let descripcion = this.addEventForm.get('eventDescription')?.value ? null : '...'
+    let descripcion = this.addEventForm.get('eventDescription')?.value ?? '...'
     this.data = [
       this.hasEvent,
       this.addEventForm.get('eventName')?.value,

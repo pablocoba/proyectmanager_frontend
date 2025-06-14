@@ -23,7 +23,9 @@ import { MiembroService } from '../commons/services/MiembroService';
 import { CurrentProyectoService } from '../commons/services/CurrentProyectoService';
 import { MiembroProyectoDto } from '../commons/dto/MiembroProyectoDto';
 import { CreateProyectoDto } from '../commons/dto/CreateProyectoDto';
-import { CreateProyectoComponent } from './create-proyecto/create-proyecto.component';
+import { CreateProyectoComponent } from '../create-proyecto/create-proyecto.component';
+import { Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -37,7 +39,8 @@ import { CreateProyectoComponent } from './create-proyecto/create-proyecto.compo
     ChatComponent,
     StyleClassModule,
     CommonModule,
-    SlicePipe
+    SlicePipe,
+    RouterModule
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
@@ -96,6 +99,7 @@ export class HeaderComponent implements OnInit {
     private miembroService : MiembroService,
     public currentProyecto : CurrentProyectoService,
     private cdr : ChangeDetectorRef,
+    private router : Router,
     @Inject(PLATFORM_ID) private platformId:Object
   ) {
 
@@ -324,5 +328,7 @@ export class HeaderComponent implements OnInit {
   });
 }
 
-  
+  toDocuments(){
+    this.router.navigate(['/docs']);
+  }
 }
