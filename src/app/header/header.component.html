@@ -41,7 +41,7 @@
                                                     <span class="font-medium">{{proyecto.nombreProyecto}}</span>
                                                 </a>
                                                 <ng-template #curProject>
-                                                    <a pRipple class="flex justify-between items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple transition">
+                                                    <a (click)="toUserPage()" pRipple class="flex justify-between items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple transition">
                                                         <div>
                                                             <i class="pi pi-reply pr-2 text-sky-500" style="font-size:1rem"></i>
                                                             <span class="text-md font-medium text-sky-500">{{proyecto.nombreProyecto}}</span>
@@ -56,8 +56,10 @@
                                 <li>
                                     <a pRipple (click)="toDocuments()"
                                         class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
-                                        <i class="pi pi-file-o mr-2"></i>
-                                        <span class="font-medium">Documentos</span>
+                                        <i *ngIf="this.router.url === '/docs'" class="pi pi-file-o mr-2 text-sky-500"></i>
+                                        <i *ngIf="this.router.url === '/user'" class="pi pi-file-o mr-2"></i>
+                                        <span *ngIf="this.router.url === '/docs'" class="font-medium text-sky-500">Documentos</span>
+                                        <span *ngIf="this.router.url === '/user'" class="font-medium">Documentos</span>
                                     </a>
                                 </li>
                                 <li>

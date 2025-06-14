@@ -113,7 +113,7 @@ export class HeaderComponent implements OnInit {
     private miembroService : MiembroService,
     public currentProyecto : CurrentProyectoService,
     private cdr : ChangeDetectorRef,
-    private router : Router,
+    public router : Router,
     private tareaService : TareaService,
     @Inject(PLATFORM_ID) private platformId:Object
   ) {
@@ -347,14 +347,13 @@ export class HeaderComponent implements OnInit {
     this.currentProyecto.cambiarProyecto(idProyecto).subscribe({
         next: (exitoso) => {
             if (exitoso) {
-                console.log('Proyecto cambiado a:', idProyecto);
                 // Forzar actualización de la vista
                 this.cdr.detectChanges();
             }
         },
         error: (err) => console.error('Error:', err)
     });
-}
+  }
 
   obtenerProyectoActual() {
     console.log(this.proyectoActual)
@@ -384,5 +383,9 @@ export class HeaderComponent implements OnInit {
 
   toDocuments(){
     this.router.navigate(['/docs']);
+  }
+
+  toUserPage(){
+    this.router.navigate(['/user']);
   }
 }
