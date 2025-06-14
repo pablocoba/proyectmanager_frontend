@@ -1,38 +1,64 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from "@angular/core";
-import { map, Observable } from "rxjs";
+import { Observable, of, Subject } from "rxjs";
+import { catchError, map, tap } from "rxjs/operators";
 import { Tarea } from '../dto/Tarea';
 import { TareaDto } from '../dto/TareaDto';
 
 @Injectable({
     providedIn: 'root'
 })
-
 export class TareaService {
-    private baseUrl : string = 'https://tfc-t00f.onrender.com';
-    private tareasUrl : string = '/tareas';
+    private baseUrl: string = 'https://tfc-t00f.onrender.com';
+    private tareasUrl: string = '/tareas';
 
-    constructor(private http: HttpClient){ }
+    // Subject para notificar actualizaciones
+    private tareasUpdatedSource = new Subject<void>();
 
-    getTareas(): Observable<Tarea[]>{
+    // Observable público para suscripciones
+    tareasUpdated$ = this.tareasUpdatedSource.asObservable();
+
+    constructor(private http: HttpClient) { }
+
+    getTareas(): Observable<Tarea[]> {
         return this.http.get<Tarea[]>(`${this.baseUrl}${this.tareasUrl}`);
     }
 
-    createTarea(dto: TareaDto): Observable<any> {
-        return this.http.post<any>(`${this.baseUrl}${this.tareasUrl}`, dto);
+    createTarea(dto: TareaDto): Observable<Tarea> {
+        return this.http.post<Tarea>(`${this.baseUrl}${this.tareasUrl}`, dto).pipe(
+            tap(() => {
+                // Notificar que se ha creado una nueva tarea
+                this.tareasUpdatedSource.next();
+            })
+        );
     }
 
-    getTareasByProyectoActivo(idProyectoActivo: number): Observable<Tarea[]> {
+    getTareasByProyecto(idProyecto: number): Observable<Tarea[]> {
+        return this.http.get<Tarea[]>(`${this.baseUrl}${this.tareasUrl}`).pipe(
+            map(tareas => tareas.filter(t => t.idProyecto === idProyecto)),
+            catchError(error => {
+                console.error('Error al obtener tareas:', error);
+                return of([]);
+            })
+        );
+    }
+
+    // Método alternativo si prefieres filtrar en el cliente
+    getTareasByProyectoActivoClientSide(idProyectoActivo: number): Observable<Tarea[]> {
         return this.getTareas().pipe(
             map(tareas => tareas.filter(tarea => tarea.idProyecto === idProyectoActivo))
         );
     }
 
-    // updateEvento(id:number, dto:EventoDto): Observable<any>{
-    //     return this.http.put<any>(`${this.baseUrl}${this.eventosUrl}/${id}`, dto)
+    // updateTarea(id: number, dto: TareaDto): Observable<Tarea> {
+    //     return this.http.put<Tarea>(`${this.baseUrl}${this.tareasUrl}/${id}`, dto).pipe(
+    //         tap(() => this.tareasUpdatedSource.next())
+    //     );
     // }
 
-    // deleteEvento(id:number):Observable<any>{
-    //     return this.http.delete<any>(`${this.baseUrl}${this.eventosUrl}/${id}`)
+    // deleteTarea(id: number): Observable<void> {
+    //     return this.http.delete<void>(`${this.baseUrl}${this.tareasUrl}/${id}`).pipe(
+    //         tap(() => this.tareasUpdatedSource.next())
+    //     );
     // }
 }

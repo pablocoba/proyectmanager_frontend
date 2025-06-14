@@ -18,6 +18,7 @@ import { MiembroService } from '../commons/services/MiembroService';
 import { CreateProyectoDto } from '../commons/dto/CreateProyectoDto';
 import { ProyectoDto } from '../commons/dto/ProyectoDto';
 import { ButtonModule } from 'primeng/button';
+import { TareaService } from '../commons/services/TareaService';
 
 @Component({
   selector: 'app-user-page',
@@ -68,7 +69,8 @@ export class UserPageComponent implements OnInit{
     private proyectoService : ProyectoService,
     private dialogService : DialogService,
     private miembroService : MiembroService,
-    private cdr : ChangeDetectorRef
+    private cdr : ChangeDetectorRef,
+    private tareaService : TareaService
   ){
       this.platformId = platformId;
       this.isBrowser = isPlatformBrowser(platformId);
@@ -89,6 +91,10 @@ export class UserPageComponent implements OnInit{
       this.proyectoActual = id;
       console.log('proyecto actual cambiado:', id)
     })
+
+    this.tareaService.tareasUpdated$.subscribe(() => {
+      this.cdr.detectChanges();
+    });
 
   }
 

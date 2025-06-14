@@ -8,8 +8,7 @@ export interface TareaDto{
     descripcion: string;
     fechaInicio: Date;
     fechaFin: Date;
-    estadoTarea: EstadoTarea;
-    proyecto:ProyectoDto;
-    asignadoA: Miembro;
-
+    estado: EstadoTarea;
+    proyecto:{ idProyecto: number },
+    asignadoA:  { idMiembro: number }
 }

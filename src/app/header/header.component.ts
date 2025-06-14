@@ -26,6 +26,9 @@ import { CreateProyectoDto } from '../commons/dto/CreateProyectoDto';
 import { CreateProyectoComponent } from '../create-proyecto/create-proyecto.component';
 import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
+import { TareaDto } from '../commons/dto/TareaDto';
+import { TareaService } from '../commons/services/TareaService';
+import { EstadoTarea } from '../commons/dto/EstadoTarea';
 
 @Component({
   selector: 'app-header',
@@ -58,6 +61,7 @@ export class HeaderComponent implements OnInit {
   projectsMenuOpen: boolean = true;
   @Output() sidebarStateChange = new EventEmitter<boolean>();
   @Output() proyectoCreado = new EventEmitter<void>();
+  @Output() tareaCreada = new EventEmitter<void>();
 
   user !: UserToken;
   mostrarNuevaTarea: boolean = false;
@@ -92,6 +96,16 @@ export class HeaderComponent implements OnInit {
     miembrosProyecto: [] 
   };
   
+  nuevaTarea : TareaDto = {
+    titulo: "prueba",
+    descripcion: "prueba",
+    fechaInicio: new Date(),
+    fechaFin: new Date(),
+    estado: EstadoTarea.PENDIENTE,
+    proyecto:{idProyecto: 0},
+    asignadoA: {idMiembro: 0},
+  }
+
   constructor(
     private dialogService: DialogService,
     private authService: AuthService,
@@ -100,6 +114,7 @@ export class HeaderComponent implements OnInit {
     public currentProyecto : CurrentProyectoService,
     private cdr : ChangeDetectorRef,
     private router : Router,
+    private tareaService : TareaService,
     @Inject(PLATFORM_ID) private platformId:Object
   ) {
 
@@ -118,9 +133,11 @@ export class HeaderComponent implements OnInit {
     this.currentProyecto.proyectoActual$.pipe(
       distinctUntilChanged(),
       switchMap(idProyecto => {
+
         if (idProyecto !== null) {
           return this.proyectoService.getProyectosById(idProyecto).pipe(
             catchError(() => of(null))
+            
           );
         }
         return of(null);
@@ -146,7 +163,7 @@ export class HeaderComponent implements OnInit {
         ...(tieneProyecto ? [{
           label: 'Nueva Tarea',
           icon: 'pi pi-plus',
-          command: () => this.showCreateTareaDialog()
+          command: () => this.crearTarea()
         }] : []),
         {
           label: 'Nuevo Proyecto',
@@ -159,13 +176,13 @@ export class HeaderComponent implements OnInit {
     });
   }
 
-  showCreateTareaDialog() {
+  crearTarea() {
 
     const isMobile = window.innerWidth < 768;
 
     this.ref = this.dialogService.open(CreateTareaDialogComponent, {
-      header: "Nueva tarea",
-      width: isMobile ? '82%' : '30%', //hace que sea más grande o peque en móvil o desktop
+      header: "Nueva Tarea",
+      width: isMobile ? '82%' : '30%',
       height: 'auto',
       modal: true,
       closable: true,
@@ -177,8 +194,113 @@ export class HeaderComponent implements OnInit {
       baseZIndex: 10000
     });
 
-    this.dialogSubscription = this.ref.onClose.subscribe()
+    this.dialogSubscription = this.ref.onClose.subscribe(tareaData => {
+      if (!tareaData) return; // Si se cerró el diálogo sin datos
+
+      this.currentProyecto.proyectoActual$.pipe(take(1)).subscribe(idProyecto => {
+        if (!idProyecto) {
+          console.error('No hay proyecto seleccionado');
+          return;
+        }
+
+        const nuevaTarea: TareaDto = {
+          titulo: tareaData.titulo,
+          descripcion: tareaData.descripcion,
+          fechaInicio: tareaData.fechaInicio,
+          fechaFin: tareaData.fechaFin,
+          estado: tareaData.estado || EstadoTarea.PENDIENTE,
+          proyecto: {
+            idProyecto: idProyecto
+          },
+          asignadoA: {
+            idMiembro: tareaData.asignadoA?.idMiembro || this.currentMember.idMiembro
+          }
+        };
+
+        this.tareaService.createTarea(nuevaTarea).subscribe({
+          next: (tareaCreada) => {
+            console.log("Tarea creada:", tareaCreada);
+            this.tareaCreada.emit(); // Notificar a los componentes padres
+            
+            // Aquí puedes añadir lógica adicional si es necesario
+            // Por ejemplo, mostrar un mensaje de éxito
+          },
+          error: (err) => {
+            console.error("Error al crear tarea:", err.error);
+            // Aquí puedes mostrar un mensaje de error al usuario
+          }
+        });
+      });
+    });
   }
+
+  crearProyecto() {
+  const isMobile = window.innerWidth < 768;
+
+  this.ref = this.dialogService.open(CreateProyectoComponent, {
+    header: "Nuevo Proyecto",
+    width: isMobile ? '82%' : '30%',
+    height: 'auto',
+    modal: true,
+    closable: true,
+    contentStyle: {
+      'max-height': '80vh',
+      overflow: 'auto',
+      'padding': '0'
+    },
+    baseZIndex: 10000
+  });
+
+  this.dialogSubscription = this.ref.onClose.subscribe(proyectoData => {
+    if (!proyectoData) return;
+
+    const nuevoProyecto = {
+      nombre: proyectoData.nombre,
+      descripcion: proyectoData.descripcion,
+      fechaInicio: new Date(),
+      fechaFin: proyectoData.fechaFin,
+      miembrosProyecto: [{ miembro: { idMiembro: this.currentMember.idMiembro } }]
+    };
+
+    this.proyectoService.createProyecto(nuevoProyecto).subscribe({
+      next: (proyectoCreado) => {
+        console.log("Proyecto creado:", proyectoCreado);
+        this.proyectoCreado.emit();
+        // 1. Actualizar la lista de proyectos
+        this.proyectoService.getProyectosUsuario().subscribe(proyectos => {
+          this.proyectosUsuario = proyectos;
+          
+          // 2. Buscar el proyecto recién creado (por nombre o ID si lo tienes)
+          const proyectoNuevo = proyectos.find(p => p.nombreProyecto === proyectoData.nombre);
+          
+          if (proyectoNuevo) {
+            // 3. Establecer como proyecto actual SIEMPRE
+            this.currentProyecto.cambiarProyecto(proyectoNuevo.idProyecto).subscribe({
+              next: () => {
+                console.log('Proyecto establecido como actual:', proyectoNuevo.idProyecto);
+                
+                // 4. Forzar actualización completa
+                this.currentProyecto.proyectoActual$.pipe(take(1)).subscribe(idProyecto => {
+                  if (idProyecto) {
+                    this.proyectoService.getProyectosById(idProyecto).subscribe({
+                      next: (proyecto) => {
+                        this.currentProject = proyecto;
+                        this.cdr.detectChanges(); // Forzar detección de cambios
+                      },
+                      error: (err) => console.error('Error al cargar proyecto:', err)
+                    });
+                  }
+                });
+              },
+              error: (err) => console.error('Error al cambiar proyecto:', err)
+            });
+          }
+        });
+      },
+      error: (err) => console.error("Error al crear proyecto:", err)
+    });
+  });
+}
 
   onLogout(){
     this.authService.logout();
@@ -259,74 +381,6 @@ export class HeaderComponent implements OnInit {
       }
     }
   }
-
-  crearProyecto() {
-  const isMobile = window.innerWidth < 768;
-
-  this.ref = this.dialogService.open(CreateProyectoComponent, {
-    header: "Nuevo Proyecto",
-    width: isMobile ? '82%' : '30%',
-    height: 'auto',
-    modal: true,
-    closable: true,
-    contentStyle: {
-      'max-height': '80vh',
-      overflow: 'auto',
-      'padding': '0'
-    },
-    baseZIndex: 10000
-  });
-
-  this.dialogSubscription = this.ref.onClose.subscribe(proyectoData => {
-    if (!proyectoData) return;
-
-    const nuevoProyecto = {
-      nombre: proyectoData.nombre,
-      descripcion: proyectoData.descripcion,
-      fechaInicio: new Date(),
-      fechaFin: proyectoData.fechaFin,
-      miembrosProyecto: [{ miembro: { idMiembro: this.currentMember.idMiembro } }]
-    };
-
-    this.proyectoService.createProyecto(nuevoProyecto).subscribe({
-      next: (proyectoCreado) => {
-        console.log("Proyecto creado:", proyectoCreado);
-        this.proyectoCreado.emit();
-        // 1. Actualizar la lista de proyectos
-        this.proyectoService.getProyectosUsuario().subscribe(proyectos => {
-          this.proyectosUsuario = proyectos;
-          
-          // 2. Buscar el proyecto recién creado (por nombre o ID si lo tienes)
-          const proyectoNuevo = proyectos.find(p => p.nombreProyecto === proyectoData.nombre);
-          
-          if (proyectoNuevo) {
-            // 3. Establecer como proyecto actual SIEMPRE
-            this.currentProyecto.cambiarProyecto(proyectoNuevo.idProyecto).subscribe({
-              next: () => {
-                console.log('Proyecto establecido como actual:', proyectoNuevo.idProyecto);
-                
-                // 4. Forzar actualización completa
-                this.currentProyecto.proyectoActual$.pipe(take(1)).subscribe(idProyecto => {
-                  if (idProyecto) {
-                    this.proyectoService.getProyectosById(idProyecto).subscribe({
-                      next: (proyecto) => {
-                        this.currentProject = proyecto;
-                        this.cdr.detectChanges(); // Forzar detección de cambios
-                      },
-                      error: (err) => console.error('Error al cargar proyecto:', err)
-                    });
-                  }
-                });
-              },
-              error: (err) => console.error('Error al cambiar proyecto:', err)
-            });
-          }
-        });
-      },
-      error: (err) => console.error("Error al crear proyecto:", err)
-    });
-  });
-}
 
   toDocuments(){
     this.router.navigate(['/docs']);

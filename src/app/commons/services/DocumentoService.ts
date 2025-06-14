@@ -1,0 +1,32 @@
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { Observable } from "rxjs";
+import { Evento } from "../dto/Evento";
+import { Proyecto } from "../dto/Proyecto";
+
+@Injectable({
+    providedIn: 'root'
+})
+
+export class EventoService {
+    private baseUrl : string = 'https://tfc-t00f.onrender.com';
+    private docsUrl : string = '/eventos';
+    private eventosByProyectIdUrl : string = '/eventos/proyecto/';
+    constructor(private http: HttpClient){ }
+
+    getProyectos(): Observable<Proyecto[]>{
+        return this.http.get<Proyecto[]>(`${this.baseUrl}${this.docsUrl}`);
+    }
+    // createEvento(dto: EventoDto): Observable<any> {
+    //     return this.http.post<any>(`${this.baseUrl}${this.eventosUrl}`, dto);
+    // }
+    // getEventosByProyecto(id : number): Observable<Evento[]>{
+    //     return this.http.get<Evento[]>(`${this.baseUrl}${this.eventosByProyectIdUrl}${id}`)
+    // }
+    // updateEvento(id:number, dto:EventoDto): Observable<any>{
+    //     return this.http.put<any>(`${this.baseUrl}${this.eventosUrl}/${id}`, dto)
+    // }
+    // deleteEvento(id:number):Observable<any>{
+    //     return this.http.delete<any>(`${this.baseUrl}${this.eventosUrl}/${id}`)
+    // }
+}
