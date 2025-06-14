@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { map, Observable } from "rxjs";
 import { Tarea } from '../dto/Tarea';
 import { TareaDto } from '../dto/TareaDto';
 
@@ -22,6 +22,11 @@ export class TareaService {
         return this.http.post<any>(`${this.baseUrl}${this.tareasUrl}`, dto);
     }
 
+    getTareasByProyectoActivo(idProyectoActivo: number): Observable<Tarea[]> {
+        return this.getTareas().pipe(
+            map(tareas => tareas.filter(tarea => tarea.idProyecto === idProyectoActivo))
+        );
+    }
 
     // updateEvento(id:number, dto:EventoDto): Observable<any>{
     //     return this.http.put<any>(`${this.baseUrl}${this.eventosUrl}/${id}`, dto)

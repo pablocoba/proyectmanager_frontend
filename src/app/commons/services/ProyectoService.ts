@@ -1,9 +1,12 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { filter, map, Observable, tap } from "rxjs";
 import { Proyecto } from "../dto/Proyecto";
 import { ProyectoDto } from "../dto/ProyectoDto";
 import { CreateProyectoDto } from "../dto/CreateProyectoDto";
+import { MiembroProyectoDto } from "../dto/MiembroProyectoDto";
+import { MiembroService } from "./MiembroService";
+import { MiembroDto } from "../dto/MiembroDto";
 
 @Injectable({
     providedIn: 'root'
@@ -12,8 +15,9 @@ import { CreateProyectoDto } from "../dto/CreateProyectoDto";
 export class ProyectoService {
     private baseUrl : string = 'https://tfc-t00f.onrender.com';
     private proyectosUrl : string = '/proyectos';
+    private proyectosUsuario: MiembroProyectoDto[] = [];
 
-    constructor(private http: HttpClient){ }
+    constructor(private http: HttpClient, private miembroService : MiembroService){ }
 
     getProyectos(): Observable<ProyectoDto[]>{
         return this.http.get<ProyectoDto[]>(`${this.baseUrl}${this.proyectosUrl}`);
@@ -22,8 +26,17 @@ export class ProyectoService {
     getProyectosById(id : number): Observable<ProyectoDto>{
         return this.http.get<ProyectoDto>(`${this.baseUrl}${this.proyectosUrl}/${id}`);
     }
+    
     createProyecto(dto: CreateProyectoDto):Observable<any>{
         return this.http.post<any>(`${this.baseUrl}${this.proyectosUrl}`, dto);
+    }
+
+    getProyectosUsuario(): Observable<MiembroProyectoDto[]>{
+        return this.miembroService.getMiembroActual().pipe(
+            filter((miembro): miembro is MiembroDto => miembro !== null),
+            map(miembro => miembro.proyectos),
+            tap(proyectos => this.proyectosUsuario = proyectos)
+        )
     }
 
 }

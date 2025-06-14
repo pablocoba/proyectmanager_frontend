@@ -1,15 +1,20 @@
 <main class="bg-slate-100 dark:bg-[#1C1B22] h-screen">
   <ng-container *ngIf="authService.isAuthenticated()">
-    <app-header class="z-90"></app-header>
-    <section class="main-content">
+    <app-header (proyectoCreado)="actualizarProyectos()" [proyectosUsuario]="proyectosUsuario" [proyectoActual]="proyectoActual" class="z-90"></app-header>
+    <section *ngIf="proyectosUsuario && proyectosUsuario.length > 0 else crearProyecto" class="main-content">
       <div class="border-1 rounded-2xl p-5 lg:mx-[20%] m-5 dark:shadow-inner shadow-gray-500 max-h-[375px] overflow-y-hidden bg-white dark:bg-gray-900 relative">
-        <app-project-manager></app-project-manager>
-        <div class="absolute inset-x-0 bottom-0 dark:h-30 h-40 bg-gradient-to-t dark:from-neutral-950 from-white to-transparent pointer-events-none rounded-sm"></div>
+        <app-project-manager [proyectoActual]="proyectoActual"></app-project-manager>
       </div>
       <div class="dark:shadow-inner shadow-gray-500/80 flex flex-col lg:flex-row justify-center border-1 rounded-2xl lg:p-5 px-7 m-5 lg:mx-[20%] py-5 bg-white dark:bg-gray-900">
-        <app-calendar></app-calendar>
+        <app-calendar [proyectoActual]="proyectoActual"></app-calendar>
       </div>
     </section>
+    <ng-template #crearProyecto>
+      <div (click)="createProyecto()" style="cursor:pointer" class="border-2 border-dashed lg:p-15 lg:mx-[30%] mx-[5%] p-10 text-center gap-7 rounded-lg flex flex-col justify-center p-5 items-center">
+        <h2 class="font-bold text-xl">¡Comienza a organziarte creando tu primer proyecto!</h2>
+        <i class="pi pi-plus" style="font-size:2.5rem"></i>
+      </div>
+    </ng-template>
 </ng-container>
 </main>
 

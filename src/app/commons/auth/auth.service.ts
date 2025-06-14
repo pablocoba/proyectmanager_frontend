@@ -2,6 +2,7 @@ import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
+import { CurrentProyectoService } from '../services/CurrentProyectoService';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -10,6 +11,7 @@ export class AuthService {
 
     constructor(
         @Inject(PLATFORM_ID) private platformId: Object,
+        private currentProyecto : CurrentProyectoService, 
         private router: Router
     ) {
         this.isBrowser = isPlatformBrowser(this.platformId);
@@ -35,7 +37,10 @@ export class AuthService {
         try {
             // 1. Limpiar todos los datos de autenticación
             localStorage.removeItem('authToken');
+            localStorage.removeItem('proyectoActual')
             sessionStorage.clear(); // Limpieza adicional
+
+            
             
             // 2. Actualizar el estado de autenticación
             this.authStatus.next(false);

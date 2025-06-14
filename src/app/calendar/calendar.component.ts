@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, Input, OnInit, PLATFORM_ID, ViewEncapsulation } from '@angular/core';
 import { AddEventComponent } from './add-event/add-event.component';
 import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AlertService } from '../commons/services/AlertService';
@@ -16,6 +16,8 @@ import { formatDate } from '../commons/functions/formatDate';
 import { ProyectoDto } from '../commons/dto/ProyectoDto';
 import { CalendarDay } from '../commons/dto/CalendarDay';
 import { ViewEventComponent } from './view-event/view-event.component';
+import { CurrentProyectoService } from '../commons/services/CurrentProyectoService';
+import { UserToken } from '../commons/dto/UserToken';
 
 
 @Component({
@@ -40,25 +42,19 @@ export class CalendarComponent implements OnInit{
 
   ref: DynamicDialogRef | undefined;
   private dialogSubscription: Subscription | undefined; // Para gestionar la suscripción
-
+  @Input() proyectoActual: number | null = null;
   todayDate: Date = new Date();
   displayedDays: CalendarDay[]= [] //mostrará 5 días en desktop y 1 en móvil
   displayedEventDays: CalendarDay[] = []
 
-  currentProject : ProyectoDto ={
-    idProyecto: 1,
-    nombre:"string",
-    descripcion:"string" ,
-    fechaInicio:formatDate(new Date()),
-    fechaFin:formatDate(new Date()),
-  }
+  currentProject !: ProyectoDto; 
 
   eventos : Evento[] = [];
   currentDateSelected: Date = new Date();
   currentMonthSelected : string = this.getMonthName(new Date());
 
   hasEvent: boolean = false;
-
+  user !: UserToken;
   currentEvent !: Evento
 
   //Devuelve el nombre completo del día de hoy en Español.
@@ -101,19 +97,45 @@ export class CalendarComponent implements OnInit{
     private eventoService : EventoService,
     private proyectoService : ProyectoService,
     private miembroService : MiembroService,
-    private cdr : ChangeDetectorRef
+    private cdr : ChangeDetectorRef,
+    private currentProyecto : CurrentProyectoService,
+    @Inject(PLATFORM_ID) private platformId:Object
   ){
     
-    this.proyectoService.getProyectosById(1).subscribe(proyecto=>{
-      this.currentProject = proyecto;
-    })
-    
+    if(isPlatformBrowser(this.platformId)){
+      this.user = {
+        username : localStorage.getItem('username')!,
+        token: localStorage.getItem('authToken')!
+      }
+    }
+
+    this.currentProyecto.proyectoActual$.subscribe(idProyecto => {
+      console.log('ID Proyecto recibido:', idProyecto);
+      
+      // 3. Si hay un proyecto seleccionado
+      if (idProyecto !== null) {
+        this.proyectoService.getProyectosById(idProyecto).subscribe({
+          next: (proyecto) => {
+            this.currentProject = proyecto;
+            console.log('Proyecto cargado:', proyecto);
+            this.loadEventos();
+            this.cdr.detectChanges;
+          },
+          error: (err) => {
+            console.error('Error al cargar proyecto:', err);
+
+          }
+        });
+      } else {
+        console.log('No hay proyecto seleccionado');
+      }
+    });
+
 
   }
 
   async ngOnInit(){
     this.currentDateSelected = new Date()
-    await this.loadEventos()
     this.updateCalendarView();
   }
 
@@ -189,7 +211,6 @@ export class CalendarComponent implements OnInit{
     try {
       // Si loadEventos ya devuelve una Promise, SOLO usa await directamente:
       await this.eventoService.deleteEvento(event).toPromise();
-
       await this.loadEventos(); 
       this.hasEvent = false; 
       this.updateCalendarView();
@@ -244,23 +265,6 @@ previousBig(): void {
 
   }
 
-  //TODO MAÑANA
-  checkDateEvents(){
-    
-    for(let dia of this.displayedDays){
-      
-      for(let evento of this.eventos){
-
-        
-
-      }
-  
-    }
-
-  }
-
-
-
   private generateDisplayedDays(centerDate: Date): CalendarDay[] {
     const days: CalendarDay[] = [];
     const numDaysToShow = 5; // Siempre 5 días
@@ -295,15 +299,21 @@ private updateCalendarView(): void {
 }
 
   async loadEventos() {
-    try {
-      const eventos = await this.eventoService.getEventos().toPromise();
-      this.eventos = eventos || []; // Si es undefined, usa array vacío
-
-    } catch (error) {
-      console.error('Error:', error);
-      this.eventos = []; // También en caso de error
-    }
+  try {
+    if (!this.currentProject) return; // Si no hay proyecto, salir
+    
+    const eventos = await this.eventoService.getEventosByProyecto(this.currentProject.idProyecto).toPromise();
+    this.eventos = eventos || [];
+    console.log("eventos cargados:",eventos)
+    // Actualizar la vista
+    this.updateCalendarView();
+    this.cdr.detectChanges();
+    
+  } catch (error) {
+    console.error('Error:', error);
+    this.eventos = [];
   }
+}
 
   updateCurrentDayEventState(): void {
   let eventFoundForCurrentDay: Evento | null = null;

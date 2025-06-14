@@ -25,7 +25,7 @@ export class AddEventComponent {
 
   addEventForm: FormGroup = new FormGroup({
     eventName: new FormControl(null, [Validators.required]),
-    eventDescription: new FormControl(null, [Validators.required]),
+    eventDescription: new FormControl(null),
     eventDate: new FormControl(null, [Validators.required]),
   })
 
@@ -50,10 +50,11 @@ export class AddEventComponent {
   }
   onEventAdded(){
     this.hasEvent = true;
+    let descripcion = this.addEventForm.get('eventDescription')?.value ? null : '...'
     this.data = [
       this.hasEvent,
       this.addEventForm.get('eventName')?.value,
-      this.addEventForm.get('eventDescription')?.value,
+      descripcion,
       this.currentDateSelected
     ]
     this.ref.close(this.data);

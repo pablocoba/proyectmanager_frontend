@@ -5,7 +5,8 @@
 </div>
 
 
-<div class="grid-cols-1 lg:grid-cols-4 gap-4 hidden lg:grid">
+<div *ngIf="tareas.length > 0 else noTarea">
+    <div class="grid-cols-1 lg:grid-cols-4 gap-4 hidden lg:grid">
     <app-tarjeta-tarea 
         *ngFor="let tarea of tareas | slice:0:12 ; let i = index"
         [tareaData]="tarea"
@@ -18,9 +19,17 @@
         [tareaData]="tarea"
         [index]="i"
     ></app-tarjeta-tarea>
-    <div class="absolute inset-x-0 bottom-0 h-50 bg-gradient-to-t dark:from-neutral-950 from-white to-transparent pointer-events-none rounded-sm"></div>
+
+</div>
 </div>
 <ng-template #noTarea>
-    caca
+    <div class="border-2 border-dashed lg:p-15 lg:mx-[30%] p-10 text-center gap-7 rounded-lg flex flex-col justify-center p-5 items-center">
+        <h2 class="font-medium text-xl">¡Prueba a añadir una nueva tarea!</h2>
+        <i class="pi pi-plus" style="font-size:2.5rem"></i>
+    </div>
 </ng-template>
 </section>
+
+<!-- sombrita  -->
+<div *ngIf="tareas.length >= 5" class="absolute inset-x-0 bottom-0 h-50 bg-gradient-to-t dark:from-neutral-950 from-white to-transparent pointer-events-none rounded-sm"></div>
+

@@ -1,16 +1,24 @@
 <header>
     <nav>
         <ul class="flex flex-row lg:gap-1 lg:align-center justify-between lg:justify-start p-5">
-            <p-drawer #drawerRef [(visible)]="visible" position="left" [modal]="false">
+            <p-drawer *ngIf="proyectosUsuario && proyectosUsuario.length > 0" #drawerRef [(visible)]="visible" position="left" [modal]="false">
                 <ng-template #headless>
                     <div class="flex flex-col h-full">
                         <div class="flex flex-row justify-between px-4 pt-4">
                             <div class="flex flex-row items-start">
-                                <i class="pi pi-folder p-3" style="font-size:1.75rem"></i>
-                                <p class="font-semibold text-2xl pt-1 pl-3 text-primary">{{currentProject.nombre}}</p>
+                                <i class="pi pi-folder p-3 pt-1.5 pr-1" style="font-size:1.75rem"></i>
+                                <p class="font-semibold text-2xl pt-1 pl-3 text-primary">{{currentProject?.nombre}}</p>
                             </div>
                             <p-button type="button" (click)="onSidebarChange()" icon="pi pi-times" rounded="true"
                                 outlined="true" styleClass="h-8 w-8"></p-button>
+                        </div>
+                        <div class="mt-8">
+                            <hr class="mb-4 mx-4 border-t border-0 border-surface" />
+                            <a pRipple
+                                class="mt-4 mx-4 flex items-center cursor-pointer p-4 pb-2 gap-2 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                <p-avatar [label]="(user.username | slice:0:1 | uppercase)" />
+                                <span class="font-bold pl-2">{{user.username}}</span>
+                            </a>
                         </div>
                         <div class="overflow-y-auto">
                             <ul class="list-none p-4 m-0">
@@ -28,14 +36,14 @@
                                     <ul [class.hidden]="!projectsMenuOpen"
                                         class="list-none py-0 pl-4 pr-0 m-0 overflow-y-hidden transition-all duration-[400ms] ease-in-out">
                                         <li>
-                                            <div *ngFor="let proyecto of proyectos" >
-                                                <a *ngIf="proyecto.idProyecto !== this.currentProject.idProyecto else curProject" pRipple class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
-                                                    <span class="font-medium">{{proyecto.nombre}}</span>
+                                            <div *ngFor="let proyecto of proyectosUsuario" (click)="cambiarProyecto(proyecto.idProyecto)">
+                                                <a *ngIf="proyecto.idProyecto !== this.currentProject?.idProyecto else curProject" pRipple class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors transition p-ripple list-arrow-item">
+                                                    <span class="font-medium">{{proyecto.nombreProyecto}}</span>
                                                 </a>
                                                 <ng-template #curProject>
-                                                    <a pRipple class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
-                                                        <i class="pi pi-reply pr-2 text-sky-500" style="font-size:.75rem"></i>
-                                                        <span class="font-medium text-sky-500">{{proyecto.nombre}}</span>
+                                                    <a pRipple class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple transition">
+                                                        <i class="pi pi-reply pr-2 text-sky-500" style="font-size:1rem"></i>
+                                                        <span class="text-md font-medium text-sky-500">{{proyecto.nombreProyecto}}</span>
                                                     </a>
                                                 </ng-template>
                                             </div>
@@ -66,19 +74,10 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="mt-auto">
-                            <hr class="mb-4 mx-4 border-t border-0 border-surface" />
-                            <a pRipple
-                                class="m-4 flex items-center cursor-pointer p-4 gap-2 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
-                                <p-avatar image="https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png"
-                                    shape="circle" />
-                                <span class="font-bold pl-2">{{user.username}}</span>
-                            </a>
-                        </div>
                     </div>
                 </ng-template>
             </p-drawer>
-            <p-button (click)="onSidebarChange()" icon="pi pi-bars" class="sidebarMove ml-[-2%] lg:mt-0 mt-[4px]"
+            <p-button *ngIf="proyectosUsuario && proyectosUsuario.length > 0" (click)="onSidebarChange()" icon="pi pi-bars" class="sidebarMove ml-[-2%] lg:mt-0 mt-[4px]"
                 link="true" />
             <li>
                 <h2 class="text-xl lg:pl-2 pt-[10px] text-center">Workflow Manager | <span
@@ -88,21 +87,23 @@
                 <p-button (click)="menu.toggle($event)" link="true" icon="pi pi-plus" size="large">
                 </p-button>
             </li>
-            <p-drawer #drawerRef [(visible)]="chatVisibility" position="right" [modal]="false">
+            <p-drawer *ngIf="proyectosUsuario && proyectosUsuario.length > 0" #drawerRef [(visible)]="visible" [(visible)]="chatVisibility" position="right" [modal]="false">
                 <ng-template #headless>
                     <div class="flex flex-col h-full">
-                        <div class="flex flex-row justify-between px-4 pt-4">
-                            <p class="font-semibold text-2xl pt-1 pl-3 text-primary"><i class="pi pi-comments pr-3"
-                                    style="font-size: 1.2rem;"></i>Chat</p>
-                            <p-button type="button" (click)="onChatbarChange()" icon="pi pi-times" rounded="true"
+                        <div class="flex flex-row justify-between px-6 pt-6">
+                            <div class="flex flex-row items-center pl-1">
+                                <i class="pi pi-comments pt-1" style="font-size: 1.5rem;"></i>
+                                <p class="font-semibold text-2xl pt-1 pl-3 text-primary">Chat</p>
+                            </div>
+                            <p-button class="pr-1" type="button" (click)="onChatbarChange()" icon="pi pi-times" rounded="true"
                                 outlined="true" styleClass="h-8 w-8"></p-button>
                         </div>
                         <div class="p-6">
-                            <app-chat></app-chat>
+                            <app-chat [proyectoActual]="proyectoActual"></app-chat>
                         </div>
                         <div class="overflow-y-auto">
                             <ul class="list-none p-4 m-0">
-                                <li>
+                                <!-- <li>
                                     <a pRipple
                                         class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
                                         <i class="pi pi-file-o mr-2"></i>
@@ -115,14 +116,13 @@
                                         <i class="pi pi-cog mr-2"></i>
                                         <span class="font-medium">Configuración de proyecto</span>
                                     </a>
-                                </li>
+                                </li> -->
                             </ul>
                         </div>
                     </div>
                 </ng-template>
             </p-drawer>
         </ul>
-
     </nav>
     <p-menu #menu [popup]="true" [model]="items"></p-menu>
 

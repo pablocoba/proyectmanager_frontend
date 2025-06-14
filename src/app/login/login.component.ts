@@ -71,7 +71,7 @@ export class LoginComponent implements OnInit{
           if (user && user.token) {
             localStorage.setItem('authToken', user.token);
             localStorage.setItem('username', user.username);
-            console.log('Token guardado en localStorage:', user.token);
+            localStorage.setItem('proyectoSeleccionado', '1');
             this.onLoginSuccess(user.token);
           } else {
             // Asegúrate de que este console.warn también esté dentro del if (isPlatformBrowser)

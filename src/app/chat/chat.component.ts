@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe, isPlatformBrowser } from '@angular/common';
-import { Component, ElementRef, HostListener, Inject, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, Inject, Input, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
 import { ChatService } from '../commons/services/ChatService';
 import { Mensaje } from '../commons/dto/Mensaje';
 import { ProyectoDto } from '../commons/dto/ProyectoDto';
@@ -15,6 +15,7 @@ import { MiembroService } from '../commons/services/MiembroService';
 import { Proyecto } from '../commons/dto/Proyecto';
 import { CreateMsgMiembroDto } from '../commons/dto/CreateMsgMiembroDto';
 import { CreateMsgProyectoDto } from '../commons/dto/CreateMsgProyectoDto';
+import { CurrentProyectoService } from '../commons/services/CurrentProyectoService';
 
 @Component({
   selector: 'app-chat',
@@ -48,15 +49,14 @@ export class ChatComponent implements OnInit{
   miembroMensaje : CreateMsgMiembroDto ={
     idMiembro: 0
   };
-  proyectoMensaje : CreateMsgProyectoDto ={
-    idProyecto: 0
-  };
+  
+  @Input() proyectoActual: number | null = null;
 
   constructor(
     private chatService : ChatService,
     private proyectoService : ProyectoService,
     private miembroService : MiembroService,
-
+    private currentProyecto : CurrentProyectoService,
     @Inject(PLATFORM_ID) private platformId:Object
   ){
     if(isPlatformBrowser(this.platformId)){
@@ -66,14 +66,16 @@ export class ChatComponent implements OnInit{
       }
     }
 
-    this.proyectoService.getProyectos().subscribe(proyectos=>{
-      this.proyectos = proyectos;
-      this.currentProject = proyectos[0];
-      this.proyectoMensaje =  {
-        idProyecto: this.currentProject.idProyecto
-      }
+    this.currentProyecto.proyectoActual$.subscribe(idProyecto => {
 
-      this.chatService.getMensajes(this.currentProject.idProyecto).subscribe({
+      console.log('ID Proyecto recibido:', idProyecto);
+      
+      // 3. Si hay un proyecto seleccionado
+      if (idProyecto !== null) {
+        this.proyectoService.getProyectosById(idProyecto).subscribe({
+          next: (proyecto) => {
+            this.currentProject = proyecto;
+            this.chatService.getMensajes(this.currentProject.idProyecto).subscribe({
         next: (mensajes: Mensaje[]) => {
           this.mensajes = mensajes;
           console.log("Mensajes recibidos:", this.mensajes);
@@ -103,6 +105,15 @@ export class ChatComponent implements OnInit{
           console.error("Error al obtener mensajes:", err);
         }
       });
+          },
+          error: (err) => {
+            console.error('Error al cargar proyecto:', err);
+
+          }
+        });
+      } else {
+        console.log('No hay proyecto seleccionado');
+      }
       
     })
 
@@ -129,7 +140,7 @@ export class ChatComponent implements OnInit{
     const mensaje = this.chatForm.get('mensaje')?.value
 
     this.nuevoMensaje ={
-      proyecto : this.proyectoMensaje,
+      proyecto : this.currentProject,
       miembro : this.miembroMensaje,
       fechaHora : new Date(),
       contenido : mensaje

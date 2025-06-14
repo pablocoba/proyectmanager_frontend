@@ -33,6 +33,7 @@ import { Textarea, TextareaModule } from 'primeng/textarea';
 export class ViewEventComponent {
 
   @Output() closeDialog = new EventEmitter<void>();
+  
   currentEvent: Evento | null = null; // Inicializa como null
   currentDayDate: Date | null = null;
   editMode : boolean = false;

@@ -1,7 +1,18 @@
+import { Documento } from "./Documento";
+import { Evento } from "./Evento";
+import { Mensaje } from "./Mensaje";
+import { Miembro } from "./Miembro";
+import { Tarea } from "./Tarea";
+
 export interface Proyecto {
-    id : number;
+    idProyecto : number;
     nombre : string;
     descripcion : string;
-    fechaInicio : string;
-    fechaFin : string;
+    fechaInicio : Date;
+    fechaFin : Date;
+    idTareas: Tarea[];
+    idDocumentos: Documento[];
+    idEventos: Evento[];
+    idMensajes: Mensaje[];
+    miembros: Miembro[];
 }
