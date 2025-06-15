@@ -37,6 +37,7 @@ export class ProyectoService {
     }
 
     updateProyecto(id:number, dto: CreateProyectoDto):Observable<any>{
+        console.log("proyecto actualizandose:::::",dto)
         return this.http.put<any>(`${this.baseUrl}${this.proyectosUrl}/${id}`, dto)
     }
 

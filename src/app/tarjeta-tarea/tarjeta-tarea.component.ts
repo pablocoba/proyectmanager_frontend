@@ -84,7 +84,6 @@ export class TarjetaTareaComponent implements OnInit {
         contentStyle: { 'max-height': '90vh', overflow: 'auto' }
     });
 
-    // Cambio clave aquí:
     this.ref.onClose.subscribe((tareaActualizada: TareaDto) => {
         if (tareaActualizada) {
             // Solo actualizamos los datos locales con lo que vino del diálogo

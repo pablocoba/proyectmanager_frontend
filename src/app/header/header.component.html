@@ -109,21 +109,20 @@
                             <app-chat [proyectoActual]="proyectoActual"></app-chat>
                         </div>
                         <div class="overflow-y-auto">
-                            <ul class="list-none p-4 m-0">
-                                <!-- <li>
-                                    <a pRipple
-                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
-                                        <i class="pi pi-file-o mr-2"></i>
-                                        <span class="font-medium">Documentos</span>
-                                    </a>
+                            <ul class="list-none p-4 pt-0 m-0">
+                                <li class="flex flex-row justify-center">
+                                    <div class="flex flex-row">
+                                        <p-button 
+                                            label="Agregar miembros"
+                                            id="agregar"
+                                            *ngIf="currentProject" 
+                                            (click)="op.toggle($event); loadAvailableMembers()" 
+                                            icon="pi pi-users" 
+                                            size="large">
+                                        </p-button>
+                                    </div>
+
                                 </li>
-                                <li>
-                                    <a pRipple
-                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
-                                        <i class="pi pi-cog mr-2"></i>
-                                        <span class="font-medium">Configuración de proyecto</span>
-                                    </a>
-                                </li> -->
                             </ul>
                         </div>
                     </div>
@@ -132,5 +131,35 @@
         </ul>
     </nav>
     <p-menu #menu [popup]="true" [model]="items"></p-menu>
+    
+    <!-- Popover para agregar miembros -->
+    <p-overlayPanel #op>
+        <div class="p-3" style="width: 250px">
+            <h4 class="mb-3 font-bold">Agregar miembros al proyecto:</h4>
+            <div *ngIf="availableMembers.length > 0; else noMembers">
+                <div *ngFor="let member of availableMembers" class="field-checkbox mb-2">
+                    <p-checkbox 
+                        [(ngModel)]="member.selected" 
+                        [binary]="true" 
+                        (onChange)="updateSelectedMembers(member.id, $event.checked)"
+                        inputId="{{'member-' + member.id}}">
+                    </p-checkbox>
+                    <label for="{{'member-' + member.id}}" class="ml-2">{{ member.name }}</label>
+                </div>
+                <div class="flex flex-col justify-end mt-3">
+                    <p-button 
+                        label="Agregar" 
+                        icon="pi pi-check" 
+                        size="small" 
+                        (click)="confirmAddMembers()"
+                        [disabled]="selectedMembers.length === 0">
+                    </p-button>
+                </div>
+            </div>
+            <ng-template #noMembers>
+                <p>No hay nuevos miembros disponibles para agregar.</p>
+            </ng-template>
+        </div>
+    </p-overlayPanel>
 <p-button class="fixed lg:hidden bottom-6 right-6" (click)="onChatbarChange()" icon="pi pi-comments" rounded="true" size="large"></p-button>
 </header>

@@ -68,7 +68,7 @@ export class ViewEventComponent {
 
         this.eventoService.updateEvento(this.currentEvent.idEvento, eventoDto).subscribe({
           next: (eventoActualizado) => {
-            this.ref.close('updated'); // ⭐ Cierra con señal clara
+            this.ref.close('updated'); 
           },
           error: (err) => console.error('Error al guardar:', err)
         });

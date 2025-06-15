@@ -78,9 +78,6 @@ export class ProjectManagerComponent implements OnInit{
         token: localStorage.getItem('authToken')!
       }
     }
-    // this.tareaService.getTareas().subscribe(tareas=>{
-    //   this.tareas = tareas;
-    // })
     
     this.subscriptions.add(
       this.currentProyecto.proyectoActual$.subscribe(idProyecto => {
@@ -202,9 +199,7 @@ export class ProjectManagerComponent implements OnInit{
             next: (tareaCreada) => {
               console.log("Tarea creada:", tareaCreada);
               this.tareaCreada.emit(); // Notificar a los componentes padres
-              
-              // Aquí puedes añadir lógica adicional si es necesario
-              // Por ejemplo, mostrar un mensaje de éxito
+
             },
             error: (err) => {
               console.error("Error al crear tarea:", err.error);

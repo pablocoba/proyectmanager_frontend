@@ -1,5 +1,5 @@
-import { Component, OnInit, Output, EventEmitter, Inject, PLATFORM_ID, Input, ChangeDetectorRef, HostListener } from '@angular/core';
-import { MenuItem, MessageService } from 'primeng/api';
+import { Component, OnInit, Output, EventEmitter, Inject, PLATFORM_ID, Input, ChangeDetectorRef, HostListener, ViewChild } from '@angular/core';
+import { MenuItem } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
@@ -30,6 +30,10 @@ import { TareaDto } from '../commons/dto/TareaDto';
 import { TareaService } from '../commons/services/TareaService';
 import { EstadoTarea } from '../commons/dto/EstadoTarea';
 import { ProjectSettingsComponent } from './project-settings/project-settings.component';
+import { OverlayPanel, OverlayPanelModule } from 'primeng/overlaypanel';
+import { CheckboxModule } from 'primeng/checkbox';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'; 
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-header',
@@ -44,14 +48,18 @@ import { ProjectSettingsComponent } from './project-settings/project-settings.co
     StyleClassModule,
     CommonModule,
     SlicePipe,
-    RouterModule
+    RouterModule,
+    OverlayPanelModule, 
+    CheckboxModule,
+    ReactiveFormsModule,
+    FormsModule,
+    TooltipModule
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
   providers: [
     DialogService,
-    AlertService,
-    MessageService
+    AlertService
   ],
 })
 
@@ -63,6 +71,9 @@ export class HeaderComponent implements OnInit {
   @Output() sidebarStateChange = new EventEmitter<boolean>();
   @Output() proyectoCreado = new EventEmitter<void>();
   @Output() tareaCreada = new EventEmitter<void>();
+  membersPopoverVisible: boolean = false;
+  availableMembers: any[] = [];
+  selectedMembers: number[] = []; 
 
   user !: UserToken;
   mostrarNuevaTarea: boolean = false;
@@ -88,7 +99,7 @@ export class HeaderComponent implements OnInit {
   proyectos: ProyectoDto[] = [];
   username !: string;
   currentMember !: MiembroDto;
-
+  @ViewChild('op') op!: OverlayPanel;
   nuevoProyecto: CreateProyectoDto = {
     nombre: "prueba",
     descripcion: "prueba",
@@ -434,7 +445,11 @@ export class HeaderComponent implements OnInit {
               nombre: this.currentProject?.nombre,
               descripcion: this.currentProject?.descripcion,
               fechaInicio: this.currentProject?.fechaInicio,
-              fechaFin: this.currentProject?.fechaFin,
+              fechaFin: this.currentProject?.fechaFin
+                ? (typeof this.currentProject.fechaFin === 'string'
+                    ? new Date(this.currentProject.fechaFin)
+                    : this.currentProject.fechaFin)
+                : new Date(),
               idProyecto: this.currentProject?.idProyecto,
             }
           }
@@ -447,7 +462,7 @@ export class HeaderComponent implements OnInit {
             console.log('Cambios recibidos:', result.changes);
 
             const miembrosProyecto = proyectoCompleto.miembros.map(miembro => ({
-              miembro: { idMiembro: miembro.idMiembro }
+              miembro: { idMiembro: miembro.idMiembro } // Formato exacto requerido
             }));
 
             const updateDto: CreateProyectoDto = {
@@ -546,6 +561,128 @@ export class HeaderComponent implements OnInit {
   toUserPage(){
     this.router.navigate(['/user']);
   }
+
+  agregarMiembrosAlProyecto(miembrosIds: number[]) {
+  if (!this.currentProject?.idProyecto) {
+    console.error('No hay proyecto seleccionado');
+    return;
+  }
+
+  // 1. Obtener el proyecto actual con sus miembros
+  this.proyectoService.getProyectoCompletoById(this.currentProject.idProyecto).subscribe({
+    next: (proyectoCompleto) => {
+      // 2. Preparar array de miembros actuales en formato correcto
+      const miembrosActuales = proyectoCompleto.miembros.map(miembro => ({
+        miembro: { idMiembro: miembro.idMiembro }
+      }));
+
+      // 3. Preparar array de nuevos miembros (sin duplicados)
+      const nuevosMiembros = miembrosIds
+        .filter(id => !miembrosActuales.some(m => m.miembro.idMiembro === id))
+        .map(id => ({
+          miembro: { idMiembro: id } // Formato exacto requerido
+        }));
+
+      // 4. Combinar miembros actuales y nuevos
+      const todosLosMiembros = [...miembrosActuales, ...nuevosMiembros];
+
+      // 5. Crear DTO exacto con la estructura requerida
+      if (!this.currentProject) {
+        console.error('No hay proyecto seleccionado');
+        return;
+      }
+      const updateDto: CreateProyectoDto = {
+        nombre: this.currentProject?.nombre ?? '',
+        descripcion: this.currentProject?.descripcion ?? '',
+        fechaInicio: new Date(this.currentProject?.fechaInicio ?? new Date()),
+        fechaFin: this.currentProject && this.currentProject.fechaFin ? new Date(this.currentProject.fechaFin) : new Date(),
+        miembrosProyecto: todosLosMiembros
+      };
+
+      console.log('DTO enviado al backend:', JSON.stringify(updateDto, null, 2));
+
+      // 6. Enviar actualización al backend
+      this.proyectoService.updateProyecto(this.currentProject.idProyecto, updateDto).subscribe({
+        next: (proyectoActualizado) => {
+          console.log('Proyecto actualizado:', proyectoActualizado);
+          
+          // Actualizar vista
+          this.currentProject = proyectoActualizado;
+          this.loadAvailableMembers();
+          this.cdr.detectChanges();
+
+        },
+        error: (error) => {
+          console.error('Error al actualizar proyecto:', error);
+
+        }
+      });
+    },
+    error: (error) => {
+      console.error('Error al obtener proyecto:', error);
+    }
+  });
+}
+
+loadAvailableMembers() {
+  if (!this.currentProject?.idProyecto) {
+    console.log('No hay proyecto seleccionado');
+    return;
+  }
+
+  console.log('Cargando miembros disponibles...');
+  
+  this.miembroService.getMiembros().subscribe({
+    next: (allMembers) => {
+      console.log('Todos los miembros:', allMembers);
+      
+      this.proyectoService.getProyectoCompletoById(this.currentProject!.idProyecto).subscribe({
+        next: (proyecto) => {
+          const currentMemberIds = proyecto.miembros.map(m => m.idMiembro);
+          console.log('Miembros actuales en proyecto:', currentMemberIds);
+          
+          this.availableMembers = allMembers
+            .filter(member => !currentMemberIds.includes(member.idMiembro))
+            .map(member => ({
+              id: member.idMiembro,
+              name: member.nombreUsuario || member.nombreUsuario || 'Sin nombre',
+              selected: false
+            }));
+
+          console.log('Miembros disponibles para agregar:', this.availableMembers);
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error('Error al obtener proyecto:', err)
+      });
+    },
+    error: (err) => console.error('Error al obtener miembros:', err)
+  });
+}
+
+updateSelectedMembers(memberId: number, isChecked: boolean) {
+  if (isChecked) {
+    if (!this.selectedMembers.includes(memberId)) {
+      this.selectedMembers.push(memberId);
+    }
+  } else {
+    this.selectedMembers = this.selectedMembers.filter(id => id !== memberId);
+  }
+}
+
+confirmAddMembers() {
+  console.log('Confirmando agregar miembros:', this.selectedMembers);
+  this.agregarMiembrosAlProyecto(this.selectedMembers);
+  this.op.hide();
+  this.selectedMembers = []; // Limpiar selección
+  
+  // Resetear los checkboxes
+  this.availableMembers.forEach(m => m.selected = false);
+}
+
+toggleMembersPopover(event: Event) {
+  this.op.toggle(event); // Usa directamente el overlayPanel
+  this.loadAvailableMembers();
+}
 
 }
 

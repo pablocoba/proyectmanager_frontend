@@ -91,7 +91,7 @@ export class ChatComponent implements OnInit{
                 this.miembroMensaje = {
                   idMiembro: miembroFiltrado.idMiembro
                 }
-                // Aquí puedes usar miembroFiltrado para lo que necesites
+
               } else {
                 console.warn("No se encontró el miembro con username:", this.user.username);
               }

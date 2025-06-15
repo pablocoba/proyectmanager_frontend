@@ -188,6 +188,7 @@ export class UserPageComponent implements OnInit{
         });
       })
     }
+    
     actualizarProyectos() {
       this.proyectoService.getProyectosUsuario().pipe(
         take(1) // Para evitar fugas de memoria

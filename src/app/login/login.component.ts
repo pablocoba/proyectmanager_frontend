@@ -56,41 +56,32 @@ export class LoginComponent implements OnInit{
   }
 
   onLogin(){
-    console.log(this.loginForm.get('username')?.value)
-    console.log(this.loginForm.get('password')?.value)
 
     this.user.username = this.loginForm.get('username')?.value;
     this.user.password = this.loginForm.get('password')?.value;
 
     if (isPlatformBrowser(this.platformId)) {
 
+      //inicia la llamada y recoge el token.
       this.loginService.userLogIn(this.user).subscribe(
         (user: UserToken) => {
-          // No hay problema con console.log en el navegador
 
           if (user && user.token) {
+            //asigna el token, el username y el proyecto seleccionado al localStorage. 
             localStorage.setItem('authToken', user.token);
             localStorage.setItem('username', user.username);
             localStorage.setItem('proyectoSeleccionado', '1');
             this.onLoginSuccess(user.token);
           } else {
-            // Asegúrate de que este console.warn también esté dentro del if (isPlatformBrowser)
             console.warn('El objeto de usuario o la propiedad token es nula/indefinida.');
           }
         },
         error => {
-          // ¡Aquí es donde ocurre el error! Asegúrate de que console.error esté dentro del if
+
           console.error('Error en el login:', error);
         }
       );
-    } else {
-      // Si estás en un entorno no-navegador, puedes usar un logger que no dependa de console
-      // o simplemente evitar el log en el cliente si no es necesario.
-      // Si necesitas logs en el servidor, usarías un logger de Node.js o simplemente console.log/error
-      // que funcionaría en el servidor.
-      // console.warn('Ejecutando en entorno no-navegador, algunas funcionalidades de navegador no disponibles.');
     }
-
   }
 
   onLoginSuccess(token: string): void {

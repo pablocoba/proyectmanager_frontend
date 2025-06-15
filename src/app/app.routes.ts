@@ -10,6 +10,7 @@ export const routes: Routes = [
     {
         path: 'docs',
         loadComponent: () => import('./documentos/documentos.component').then(m => m.DocumentosComponent),
+        canActivate: [authGuard],
         title: 'Docs'
     },
     {
@@ -28,3 +29,4 @@ export const routes: Routes = [
         redirectTo: 'user'
     }
 ];
+
