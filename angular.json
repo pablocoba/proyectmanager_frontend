@@ -67,21 +67,34 @@
           },
           "defaultConfiguration": "production"
         },
+        "prerender": {
+          "builder": "@angular-devkit/build-angular:prerender",
+          "options": {
+            "browserTarget": "proyectmanager:build:production",
+            "serverTarget": "proyectmanager:server:production",
+            "routes": [
+              "/"
+            ]
+          }
+        },
         "server": {
           "builder": "@angular-devkit/build-angular:server",
           "options": {
-            "outputPath": "dist/proyectmanager/server",
+            "outputPath": "dist/proyectmanager-server",
             "main": "src/main.server.ts",
             "tsConfig": "tsconfig.server.json"
           },
           "configurations": {
             "production": {
               "outputHashing": "media",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
+              "sourceMap": false,
               "optimization": true
-            },
-            "development": {
-              "optimization": false,
-              "sourceMap": true
             }
           }
         },
