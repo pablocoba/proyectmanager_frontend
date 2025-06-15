@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "npm run build:ssr",
+    "build": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:proyectmanager": "node dist/proyectmanager/server/server.mjs",
@@ -13,6 +13,7 @@
     "build:ssr": "ng build && ng run proyectmanager:server",
     "prerender": "ng run proyectmanager:prerender"
   },
+
   "private": true,
   "dependencies": {
     "@angular/common": "^19.2.0",
