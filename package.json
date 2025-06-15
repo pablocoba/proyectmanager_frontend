@@ -4,13 +4,13 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "npm run build:ssr",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:proyectmanager": "node dist/proyectmanager/server/server.mjs",
     "dev:ssr": "ng run proyectmanager:serve-ssr",
     "serve:ssr": "node dist/proyectmanager/server/main.js",
-    "build:ssr": "ng build && ng run proyectmanager:server && ng run proyectmanager:prerender",
+    "build:ssr": "ng build && ng run proyectmanager:server",
     "prerender": "ng run proyectmanager:prerender"
   },
   "private": true,
