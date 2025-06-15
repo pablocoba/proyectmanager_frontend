@@ -4,6 +4,7 @@ import { Observable, of, Subject } from "rxjs";
 import { catchError, map, tap } from "rxjs/operators";
 import { Tarea } from '../dto/Tarea';
 import { TareaDto } from '../dto/TareaDto';
+import { UpdateTareaDto } from '../dto/UpdateTareaDto';
 
 @Injectable({
     providedIn: 'root'
@@ -33,6 +34,10 @@ export class TareaService {
         );
     }
 
+    updateTarea(id: number, dto: TareaDto): Observable<Tarea>{
+        return this.http.put<Tarea>(`${this.baseUrl}${this.tareasUrl}/${id}`, dto)
+    }
+
     getTareasByProyecto(idProyecto: number): Observable<Tarea[]> {
         return this.http.get<Tarea[]>(`${this.baseUrl}${this.tareasUrl}`).pipe(
             map(tareas => tareas.filter(t => t.idProyecto === idProyecto)),
@@ -48,6 +53,10 @@ export class TareaService {
         return this.getTareas().pipe(
             map(tareas => tareas.filter(tarea => tarea.idProyecto === idProyectoActivo))
         );
+    }
+
+    deleteTarea(idTarea: number):Observable<void>{
+        return this.http.delete<void>(`${this.baseUrl}${this.tareasUrl}/${idTarea}`)
     }
 
     // updateTarea(id: number, dto: TareaDto): Observable<Tarea> {

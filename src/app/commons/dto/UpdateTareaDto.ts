@@ -2,14 +2,14 @@ import { EstadoTarea } from "./EstadoTarea";
 import { Miembro } from "./Miembro";
 import { ProyectoDto } from "./ProyectoDto";
 
-export interface TareaDto{
+export interface UpdateTareaDto{
     
     titulo: string;
     descripcion: string;
     fechaInicio: Date;
     fechaFin: Date;
     estado: EstadoTarea;
-    proyecto:{ idProyecto: number },
+    proyecto: number ,
     asignadoA:  { idMiembro: number }
     
 }

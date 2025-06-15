@@ -23,7 +23,6 @@ export class ChatService {
     }
 
     createMensaje(dto: MensajeDto):Observable<any>{
-        console.log(`llamada:: ${this.baseUrl}${this.mensajesUrl}`, dto)
         return this.http.post<any>(`${this.baseUrl}${this.mensajesUrl}`, dto
         );
     }

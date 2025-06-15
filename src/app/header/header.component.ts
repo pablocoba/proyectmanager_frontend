@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, Inject, PLATFORM_ID, Input, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Inject, PLATFORM_ID, Input, ChangeDetectorRef, HostListener } from '@angular/core';
 import { MenuItem, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
@@ -29,6 +29,7 @@ import { RouterModule } from '@angular/router';
 import { TareaDto } from '../commons/dto/TareaDto';
 import { TareaService } from '../commons/services/TareaService';
 import { EstadoTarea } from '../commons/dto/EstadoTarea';
+import { ProjectSettingsComponent } from './project-settings/project-settings.component';
 
 @Component({
   selector: 'app-header',
@@ -57,7 +58,7 @@ import { EstadoTarea } from '../commons/dto/EstadoTarea';
 export class HeaderComponent implements OnInit {
 
   visible: boolean = true;
-  chatVisibility:boolean = true;
+  chatVisibility: boolean = true;
   projectsMenuOpen: boolean = true;
   @Output() sidebarStateChange = new EventEmitter<boolean>();
   @Output() proyectoCreado = new EventEmitter<void>();
@@ -84,52 +85,62 @@ export class HeaderComponent implements OnInit {
   private dialogSubscription: Subscription | undefined; // Para gestionar la suscripción
 
   currentProject !: ProyectoDto | null;
-  proyectos : ProyectoDto[] = [];
+  proyectos: ProyectoDto[] = [];
   username !: string;
   currentMember !: MiembroDto;
-  
-  nuevoProyecto : CreateProyectoDto = {
+
+  nuevoProyecto: CreateProyectoDto = {
     nombre: "prueba",
     descripcion: "prueba",
     fechaInicio: new Date(),
     fechaFin: new Date(),
-    miembrosProyecto: [] 
+    miembrosProyecto: []
   };
-  
-  nuevaTarea : TareaDto = {
+
+  nuevaTarea: TareaDto = {
     titulo: "prueba",
     descripcion: "prueba",
     fechaInicio: new Date(),
     fechaFin: new Date(),
     estado: EstadoTarea.PENDIENTE,
-    proyecto:{idProyecto: 0},
-    asignadoA: {idMiembro: 0},
+    proyecto: { idProyecto: 0 },
+    asignadoA: { idMiembro: 0 },
   }
 
   constructor(
     private dialogService: DialogService,
     private authService: AuthService,
-    private proyectoService : ProyectoService,
-    private miembroService : MiembroService,
-    public currentProyecto : CurrentProyectoService,
-    private cdr : ChangeDetectorRef,
-    public router : Router,
-    private tareaService : TareaService,
-    @Inject(PLATFORM_ID) private platformId:Object
+    private proyectoService: ProyectoService,
+    private miembroService: MiembroService,
+    public currentProyecto: CurrentProyectoService,
+    private cdr: ChangeDetectorRef,
+    public router: Router,
+    private tareaService: TareaService,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
 
-    if(isPlatformBrowser(this.platformId)){
+    if (isPlatformBrowser(this.platformId)) {
       this.user = {
-        username : localStorage.getItem('username')!,
+        username: localStorage.getItem('username')!,
         token: localStorage.getItem('authToken')!
       }
     }
 
-    this.proyectoService.getProyectosUsuario().subscribe(proyectos=>{
-      this.proyectosUsuario = proyectos;
-      console.log("fnjskdfnjksdfbjksdfjklñsfsdñkf",this.proyectosUsuario)
-    })
-    
+    this.proyectoService.getProyectosUsuario().subscribe(proyectos => {
+      // Ordenar por idProyecto (ascendente) con verificación de tipos
+      this.proyectosUsuario = proyectos.sort((a, b) => {
+        const idA = Number(a.idProyecto); // Convierte a número por si acaso
+        const idB = Number(b.idProyecto);
+
+        if (isNaN(idA) || isNaN(idB)) {
+          return a.nombreProyecto.localeCompare(b.nombreProyecto); // Fallback a nombre
+        }
+        return idA - idB; // Orden numérico
+      });
+
+      console.log("Proyectos ordenados:", this.proyectosUsuario);
+    });
+
     this.currentProyecto.proyectoActual$.pipe(
       distinctUntilChanged(),
       switchMap(idProyecto => {
@@ -137,7 +148,7 @@ export class HeaderComponent implements OnInit {
         if (idProyecto !== null) {
           return this.proyectoService.getProyectosById(idProyecto).pipe(
             catchError(() => of(null))
-            
+
           );
         }
         return of(null);
@@ -153,12 +164,47 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit() {
     this.loadCurrentMember()
+    this.checkScreenSize();
+  }
+
+  // Escucha cambios en el tamaño de la pantalla
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize() {
+    const isMobile = window.innerWidth < 1024;
+    this.chatVisibility = !isMobile;
+    this.projectsMenuOpen = !isMobile;
+    this.visible = !isMobile;
+  }
+
+  private loadCurrentMember(): void {
+    this.miembroService.getMiembroActual().subscribe({
+      next: (miembro: MiembroDto | null) => {
+        if (miembro) {
+          this.currentMember = miembro;
+          console.log('Miembro actual cargado:', miembro);
+        } else {
+          console.warn('No se encontró el miembro para el usuario actual');
+          // Puedes manejar este caso como prefieras, por ejemplo:
+          // this.alertService.warning('No se encontró tu información de miembro');
+        }
+        this.cdr.markForCheck(); // Actualizar la vista si es necesario
+      },
+      error: (err) => {
+        console.error('Error al cargar miembro actual:', err);
+        // Manejo de errores según necesites
+        // this.alertService.error('Error al cargar tu información de miembro');
+      }
+    });
   }
 
   actualizarMenuItems() {
     setTimeout(() => { // Ejecuta en el siguiente ciclo de detección de cambios
       const tieneProyecto = !!this.currentProject;
-      
+
       this.items = [
         ...(tieneProyecto ? [{
           label: 'Nueva Tarea',
@@ -171,7 +217,7 @@ export class HeaderComponent implements OnInit {
           command: () => this.crearProyecto()
         }
       ];
-      
+
       this.cdr.markForCheck(); // Marca para verificación
     });
   }
@@ -221,7 +267,7 @@ export class HeaderComponent implements OnInit {
           next: (tareaCreada) => {
             console.log("Tarea creada:", tareaCreada);
             this.tareaCreada.emit(); // Notificar a los componentes padres
-            
+
             // Aquí puedes añadir lógica adicional si es necesario
             // Por ejemplo, mostrar un mensaje de éxito
           },
@@ -235,152 +281,264 @@ export class HeaderComponent implements OnInit {
   }
 
   crearProyecto() {
-  const isMobile = window.innerWidth < 768;
 
-  this.ref = this.dialogService.open(CreateProyectoComponent, {
-    header: "Nuevo Proyecto",
-    width: isMobile ? '82%' : '30%',
-    height: 'auto',
-    modal: true,
-    closable: true,
-    contentStyle: {
-      'max-height': '80vh',
-      overflow: 'auto',
-      'padding': '0'
-    },
-    baseZIndex: 10000
-  });
+    const isMobile = window.innerWidth < 768;
 
-  this.dialogSubscription = this.ref.onClose.subscribe(proyectoData => {
-    if (!proyectoData) return;
-
-    const nuevoProyecto = {
-      nombre: proyectoData.nombre,
-      descripcion: proyectoData.descripcion,
-      fechaInicio: new Date(),
-      fechaFin: proyectoData.fechaFin,
-      miembrosProyecto: [{ miembro: { idMiembro: this.currentMember.idMiembro } }]
-    };
-
-    this.proyectoService.createProyecto(nuevoProyecto).subscribe({
-      next: (proyectoCreado) => {
-        console.log("Proyecto creado:", proyectoCreado);
-        this.proyectoCreado.emit();
-        // 1. Actualizar la lista de proyectos
-        this.proyectoService.getProyectosUsuario().subscribe(proyectos => {
-          this.proyectosUsuario = proyectos;
-          
-          // 2. Buscar el proyecto recién creado (por nombre o ID si lo tienes)
-          const proyectoNuevo = proyectos.find(p => p.nombreProyecto === proyectoData.nombre);
-          
-          if (proyectoNuevo) {
-            // 3. Establecer como proyecto actual SIEMPRE
-            this.currentProyecto.cambiarProyecto(proyectoNuevo.idProyecto).subscribe({
-              next: () => {
-                console.log('Proyecto establecido como actual:', proyectoNuevo.idProyecto);
-                
-                // 4. Forzar actualización completa
-                this.currentProyecto.proyectoActual$.pipe(take(1)).subscribe(idProyecto => {
-                  if (idProyecto) {
-                    this.proyectoService.getProyectosById(idProyecto).subscribe({
-                      next: (proyecto) => {
-                        this.currentProject = proyecto;
-                        this.cdr.detectChanges(); // Forzar detección de cambios
-                      },
-                      error: (err) => console.error('Error al cargar proyecto:', err)
-                    });
-                  }
-                });
-              },
-              error: (err) => console.error('Error al cambiar proyecto:', err)
-            });
-          }
-        });
+    this.ref = this.dialogService.open(CreateProyectoComponent, {
+      header: "Nuevo Proyecto",
+      width: isMobile ? '82%' : '30%',
+      height: 'auto',
+      modal: true,
+      closable: true,
+      contentStyle: {
+        'max-height': '80vh',
+        overflow: 'auto',
+        'padding': '0'
       },
-      error: (err) => console.error("Error al crear proyecto:", err)
+      baseZIndex: 10000
     });
-  });
-}
 
-  onLogout(){
+    this.dialogSubscription = this.ref.onClose.subscribe(proyectoData => {
+      if (!proyectoData) return;
+
+      const nuevoProyecto = {
+        nombre: proyectoData.nombre,
+        descripcion: proyectoData.descripcion,
+        fechaInicio: new Date(),
+        fechaFin: proyectoData.fechaFin,
+        miembrosProyecto: [{ miembro: { idMiembro: this.currentMember.idMiembro } }]
+      };
+
+      this.proyectoService.createProyecto(nuevoProyecto).subscribe({
+        next: (proyectoCreado) => {
+          console.log("Proyecto creado:", proyectoCreado);
+          this.proyectoCreado.emit();
+
+          // Actualizar la lista de proyectos con el mismo ordenamiento
+          this.proyectoService.getProyectosUsuario().subscribe(proyectos => {
+            // Aplicar el mismo ordenamiento que en la carga inicial
+            this.proyectosUsuario = proyectos.sort((a, b) => {
+              const idA = Number(a.idProyecto);
+              const idB = Number(b.idProyecto);
+
+              if (isNaN(idA) || isNaN(idB)) {
+                return a.nombreProyecto.localeCompare(b.nombreProyecto);
+              }
+              return idA - idB;
+            });
+
+            // Resto de la lógica para establecer el proyecto actual
+            const proyectoNuevo = this.proyectosUsuario.find(p => p.nombreProyecto === proyectoData.nombre);
+
+            if (proyectoNuevo) {
+              this.currentProyecto.cambiarProyecto(proyectoNuevo.idProyecto).subscribe({
+                next: () => {
+                  console.log('Proyecto establecido como actual:', proyectoNuevo.idProyecto);
+
+                  this.currentProyecto.proyectoActual$.pipe(take(1)).subscribe(idProyecto => {
+                    if (idProyecto) {
+                      this.proyectoService.getProyectosById(idProyecto).subscribe({
+                        next: (proyecto) => {
+                          this.currentProject = proyecto;
+                          this.cdr.detectChanges();
+                        },
+                        error: (err) => console.error('Error al cargar proyecto:', err)
+                      });
+                    }
+                  });
+                },
+                error: (err) => console.error('Error al cambiar proyecto:', err)
+              });
+            }
+          });
+        },
+        error: (err) => console.error("Error al crear proyecto:", err)
+      });
+    });
+  }
+
+  onLogout() {
     this.authService.logout();
   }
 
-  onSidebarChange(){
-    if(this.visible === true){
+  onSidebarChange() {
+    if (this.visible === true) {
       this.visible = false
       this.sidebarStateChange.emit(this.visible)
     }
-    else{
+    else {
       this.visible = true;
       this.sidebarStateChange.emit(this.visible)
     }
   }
 
-  onChatbarChange(){
-    if(this.chatVisibility === true){
+  onChatbarChange() {
+    if (this.chatVisibility === true) {
       this.chatVisibility = false
       this.sidebarStateChange.emit(this.chatVisibility)
     }
-    else{
+    else {
       this.chatVisibility = true;
       this.sidebarStateChange.emit(this.chatVisibility)
     }
   }
 
-  toggleProjectsMenu(){
-    if(this.projectsMenuOpen === true){
+  toggleProjectsMenu() {
+    if (this.projectsMenuOpen === true) {
       this.projectsMenuOpen = false
       this.sidebarStateChange.emit(this.projectsMenuOpen)
     }
-    else{
+    else {
       this.projectsMenuOpen = true;
       this.sidebarStateChange.emit(this.projectsMenuOpen)
     }
   }
 
-  openDocumentos(){
+  openDocumentos() {
 
   }
 
   cambiarProyecto(idProyecto: number): void {
     this.currentProyecto.cambiarProyecto(idProyecto).subscribe({
-        next: (exitoso) => {
-            if (exitoso) {
-                // Forzar actualización de la vista
-                this.cdr.detectChanges();
-            }
-        },
-        error: (err) => console.error('Error:', err)
+      next: (exitoso) => {
+        if (exitoso) {
+          // Forzar actualización de la vista
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => console.error('Error:', err)
     });
   }
 
-  obtenerProyectoActual() {
-    console.log(this.proyectoActual)
-  }
+  openProjectSettings() {
+    if (!this.currentProject) return;
 
-  loadCurrentMember() {
-    if (isPlatformBrowser(this.platformId)) {
-      const username = localStorage.getItem('username');
-      if (username) {
-        this.miembroService.getMiembroActual().subscribe({
-          next: (miembro) => {
-            if (miembro) {  // Verificamos que no sea null
-              this.currentMember = miembro;
-              console.log('Miembro actual cargado:', this.currentMember);
-            } else {
-              console.warn('No se encontró el miembro actual');
-              // Aquí puedes manejar el caso null como necesites
-            }
+    const isMobile = window.innerWidth < 768;
+
+    this.proyectoService.getProyectoCompletoById(this.currentProject.idProyecto).subscribe({
+      next: (proyectoCompleto: Proyecto) => {
+        const dialogConfig = {
+          header: 'Configuración del Proyecto',
+          width: isMobile ? '90%' : '30%',
+          height: 'auto',
+          modal: true,
+          closable: true,
+          contentStyle: {
+            'max-height': '80vh',
+            overflow: 'auto',
+            'padding': '0'
           },
-          error: (err) => {
-            console.error('Error al cargar miembro:', err);
+          baseZIndex: 10000,
+          data: {
+            currentSettings: {
+              nombre: this.currentProject?.nombre,
+              descripcion: this.currentProject?.descripcion,
+              fechaInicio: this.currentProject?.fechaInicio,
+              fechaFin: this.currentProject?.fechaFin,
+              idProyecto: this.currentProject?.idProyecto,
+            }
           }
-        });
-      }
-    }
-  }
+        };
 
+        this.ref = this.dialogService.open(ProjectSettingsComponent, dialogConfig);
+
+        this.ref.onClose.subscribe((result: any) => {
+          if (result && result.action === 'save') {
+            console.log('Cambios recibidos:', result.changes);
+
+            const miembrosProyecto = proyectoCompleto.miembros.map(miembro => ({
+              miembro: { idMiembro: miembro.idMiembro }
+            }));
+
+            const updateDto: CreateProyectoDto = {
+              nombre: result.changes.nombre || this.currentProject?.nombre,
+              descripcion: result.changes.descripcion || this.currentProject?.descripcion,
+              fechaInicio: this.currentProject?.fechaInicio
+                ? typeof this.currentProject.fechaInicio === 'string'
+                  ? new Date(this.currentProject.fechaInicio)
+                  : this.currentProject.fechaInicio
+                : new Date(),
+              fechaFin: result.changes.fechaFin || this.currentProject?.fechaFin,
+              miembrosProyecto: miembrosProyecto
+            };
+
+            if (this.currentProject?.idProyecto) {
+              this.proyectoService.updateProyecto(this.currentProject.idProyecto, updateDto)
+                .subscribe({
+                  next: (updatedProject) => {
+                    console.log('Proyecto actualizado:', updatedProject);
+
+                    // 1. Actualizar currentProject
+                    this.currentProject = {
+                      ...this.currentProject,
+                      ...updatedProject
+                    };
+
+                    // 2. Actualizar la lista de proyectosUsuario
+                    if (this.proyectosUsuario) {
+                      this.proyectosUsuario = this.proyectosUsuario.map(proyecto => {
+                        if (proyecto.idProyecto === this.currentProject?.idProyecto) {
+                          return {
+                            ...proyecto,
+                            nombreProyecto: updatedProject.nombre
+                          };
+                        }
+                        return proyecto;
+                      });
+                    }
+
+                    // 3. Forzar actualización de la vista
+                    this.cdr.detectChanges();
+                  },
+                  error: (err) => {
+                    console.error('Error al actualizar proyecto:', err);
+                  }
+                });
+            }
+          } else if (result?.action === 'no-changes') {
+            console.log('No hubo cambios válidos');
+          } else if (result?.action === 'delete') {
+            const deletedProjectId = this.currentProject?.idProyecto;
+
+            if (deletedProjectId !== undefined) {
+                this.proyectoService.deleteProyecto(deletedProjectId).subscribe({
+                next: () => {
+                  // Después de eliminar, actualizar la lista de proyectos
+                  this.proyectoService.getProyectosUsuario().subscribe(proyectos => {
+                    this.proyectosUsuario = proyectos.sort((a, b) => {
+                      const idA = Number(a.idProyecto);
+                      const idB = Number(b.idProyecto);
+                      return idA - idB;
+                    });
+
+                    // Si el proyecto eliminado era el actual
+                    if (this.currentProject?.idProyecto === deletedProjectId) {
+                      if (this.proyectosUsuario.length > 0) {
+                        // Seleccionar el primer proyecto de la lista
+                        this.cambiarProyecto(this.proyectosUsuario[0].idProyecto);
+                      } else {
+                        // No hay más proyectos, limpiar el estado
+                        this.currentProject = null;
+                      }
+                    }
+
+                    this.cdr.detectChanges();
+                  });
+                },
+                error: (err) => {
+                  console.error('Error al obtener proyecto completo:', err);
+                }
+              });
+            } else {
+              console.error('No se pudo eliminar el proyecto: idProyecto es undefined');
+            }
+
+
+          }
+        })
+      }
+    })
+  }
   toDocuments(){
     this.router.navigate(['/docs']);
   }
@@ -388,4 +546,7 @@ export class HeaderComponent implements OnInit {
   toUserPage(){
     this.router.navigate(['/user']);
   }
+
 }
+
+

@@ -4,14 +4,11 @@
     <section *ngIf="proyectosUsuario && proyectosUsuario.length > 0 else crearProyecto" class="main-content">
       <div class="relative border-1 rounded-2xl p-5 lg:mx-[20%] m-5 dark:shadow-inner shadow-gray-500 transition overflow-y-hidden bg-white dark:bg-gray-900 relative">
         <app-project-manager [proyectoActual]="proyectoActual"></app-project-manager>
-        <p-button (onClick)="ampliarTareas()" icon="pi pi-arrow-up-right-and-arrow-down-left-from-center" class="absolute right-3 top-3"
-            rounded="true" size="small"></p-button>
+        
       </div>
       
       <div class="relative dark:shadow-inner shadow-gray-500/80 flex flex-col lg:flex-row justify-center border-1 rounded-2xl lg:p-5 px-7 m-5 lg:mx-[20%] py-5 bg-white dark:bg-gray-900">
         <app-calendar [proyectoActual]="proyectoActual"></app-calendar>
-        <p-button icon="pi pi-arrow-up-right-and-arrow-down-left-from-center" class="absolute right-3 top-3"
-            rounded="true" size="small"></p-button>
       </div>
 
     </section>

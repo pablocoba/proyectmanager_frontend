@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, Input, OnInit, PLATFORM_ID } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, Inject, Input, OnInit, Output, PLATFORM_ID } from '@angular/core';
 import { TabsModule } from 'primeng/tabs';
 import { SelectItem } from 'primeng/api';
 import { CommonModule, isPlatformBrowser, SlicePipe } from '@angular/common';
@@ -15,6 +15,11 @@ import { ProyectoService } from '../commons/services/ProyectoService';
 import { UserToken } from '../commons/dto/UserToken';
 import { TareaDto } from '../commons/dto/TareaDto';
 import { Subscription, take } from 'rxjs';
+import { TooltipModule } from 'primeng/tooltip';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { EstadoTarea } from '../commons/dto/EstadoTarea';
+import { CreateTareaDialogComponent } from '../header/create-tarea-dialog/create-tarea-dialog.component';
+import { MiembroDto } from '../commons/dto/MiembroDto';
 
 @Component({
   selector: 'app-project-manager',
@@ -23,9 +28,13 @@ import { Subscription, take } from 'rxjs';
     CommonModule,
     TarjetaTareaComponent,
     ButtonModule,
-    SlicePipe
+    SlicePipe,
+    TooltipModule
   ],
   templateUrl: './project-manager.component.html',
+  providers:[
+    DialogService
+  ],
   styleUrl: './project-manager.component.scss'
 })
 
@@ -38,6 +47,19 @@ export class ProjectManagerComponent implements OnInit{
   tareas : Tarea[] = [];
   currentProject !: ProyectoDto;
   user !: UserToken; 
+  isMobile : boolean = false;
+  ampliarTareas : boolean = false;
+  ref: DynamicDialogRef | undefined;
+  private dialogSubscription: Subscription | undefined; // Para gestionar la suscripción
+  currentMember !: MiembroDto;
+  @Output() tareaCreada = new EventEmitter<void>();
+
+  @HostListener('window:resize')
+  checkScreenSize() {
+    this.isMobile = window.innerWidth < 1024;
+    this.cdr.detectChanges(); // Forzar actualización de vista
+  }
+
   private subscriptions: Subscription = new Subscription();
   
   constructor(
@@ -46,6 +68,8 @@ export class ProjectManagerComponent implements OnInit{
     private currentProyecto : CurrentProyectoService,
     private proyectoService : ProyectoService,
     private cdr : ChangeDetectorRef,
+    private dialogService: DialogService,
+    private miembroService : MiembroService,
     @Inject(PLATFORM_ID) private platformId: Object
   ){
     if(isPlatformBrowser(this.platformId)){
@@ -79,6 +103,15 @@ export class ProjectManagerComponent implements OnInit{
     );
   }
 
+  ampliar(){
+    if(!this.ampliarTareas){
+      this.ampliarTareas = true;
+    }
+    else{
+      this.ampliarTareas = false;
+    }
+  }
+
   private loadProyecto(idProyecto: number): void {
     this.proyectoService.getProyectosById(idProyecto).subscribe({
       next: (proyecto) => {
@@ -90,7 +123,9 @@ export class ProjectManagerComponent implements OnInit{
   }
 
   ngOnInit(): void {
+    this.loadCurrentMember()
   }
+  
   
   private loadTareas(idProyecto: number): void {
 
@@ -116,6 +151,90 @@ export class ProjectManagerComponent implements OnInit{
       this.loadTareas(event.idProyecto);
     }
   }
+  recargarTareas() {
+    if (this.proyectoActual) {
+        this.loadTareas(this.proyectoActual);
+    }
+  }
+
+  crearTarea() {
   
+      const isMobile = window.innerWidth < 768;
+  
+      this.ref = this.dialogService.open(CreateTareaDialogComponent, {
+        header: "Nueva Tarea",
+        width: isMobile ? '82%' : '30%',
+        height: 'auto',
+        modal: true,
+        closable: true,
+        contentStyle: {
+          'max-height': '80vh',
+          overflow: 'auto',
+          'padding': '0'
+        },
+        baseZIndex: 10000
+      });
+  
+      this.dialogSubscription = this.ref.onClose.subscribe(tareaData => {
+        if (!tareaData) return; // Si se cerró el diálogo sin datos
+  
+        this.currentProyecto.proyectoActual$.pipe(take(1)).subscribe(idProyecto => {
+          if (!idProyecto) {
+            console.error('No hay proyecto seleccionado');
+            return;
+          }
+  
+          const nuevaTarea: TareaDto = {
+            titulo: tareaData.titulo,
+            descripcion: tareaData.descripcion,
+            fechaInicio: tareaData.fechaInicio,
+            fechaFin: tareaData.fechaFin,
+            estado: tareaData.estado || EstadoTarea.PENDIENTE,
+            proyecto: {
+              idProyecto: idProyecto
+            },
+            asignadoA: {
+              idMiembro: tareaData.asignadoA?.idMiembro || this.currentMember.idMiembro
+            }
+          };
+  
+          this.tareaService.createTarea(nuevaTarea).subscribe({
+            next: (tareaCreada) => {
+              console.log("Tarea creada:", tareaCreada);
+              this.tareaCreada.emit(); // Notificar a los componentes padres
+              
+              // Aquí puedes añadir lógica adicional si es necesario
+              // Por ejemplo, mostrar un mensaje de éxito
+            },
+            error: (err) => {
+              console.error("Error al crear tarea:", err.error);
+              // Aquí puedes mostrar un mensaje de error al usuario
+            }
+          });
+        });
+      });
+    }
+
+    private loadCurrentMember(): void {
+        this.miembroService.getMiembroActual().subscribe({
+            next: (miembro: MiembroDto | null) => {
+                if (miembro) {
+                    this.currentMember = miembro;
+                    console.log('Miembro actual cargado:', miembro);
+                } else {
+                    console.warn('No se encontró el miembro para el usuario actual');
+                    // Puedes manejar este caso como prefieras, por ejemplo:
+                    // this.alertService.warning('No se encontró tu información de miembro');
+                }
+                this.cdr.markForCheck(); // Actualizar la vista si es necesario
+            },
+            error: (err) => {
+                console.error('Error al cargar miembro actual:', err);
+                // Manejo de errores según necesites
+                // this.alertService.error('Error al cargar tu información de miembro');
+            }
+        });
+    }
+
 }
 

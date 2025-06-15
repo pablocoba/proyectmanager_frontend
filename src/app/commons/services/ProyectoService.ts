@@ -26,9 +26,18 @@ export class ProyectoService {
     getProyectosById(id : number): Observable<ProyectoDto>{
         return this.http.get<ProyectoDto>(`${this.baseUrl}${this.proyectosUrl}/${id}`);
     }
+
+    getProyectoCompletoById(id : number): Observable<Proyecto>{
+        return this.http.get<Proyecto>(`${this.baseUrl}${this.proyectosUrl}/${id}`);
+    }
+    
     
     createProyecto(dto: CreateProyectoDto):Observable<any>{
         return this.http.post<any>(`${this.baseUrl}${this.proyectosUrl}`, dto);
+    }
+
+    updateProyecto(id:number, dto: CreateProyectoDto):Observable<any>{
+        return this.http.put<any>(`${this.baseUrl}${this.proyectosUrl}/${id}`, dto)
     }
 
     getProyectosUsuario(): Observable<MiembroProyectoDto[]>{
@@ -37,6 +46,10 @@ export class ProyectoService {
             map(miembro => miembro.proyectos),
             tap(proyectos => this.proyectosUsuario = proyectos)
         )
+    }
+
+    deleteProyecto(id:number): Observable<void>{
+        return this.http.delete<any>(`${this.baseUrl}${this.proyectosUrl}/${id}`)
     }
 
 }

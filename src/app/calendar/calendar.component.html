@@ -3,12 +3,22 @@
     <!-- Calendario móvil -->
     <div class="lg:hidden m-auto">
         <div class="flex flex-row justify-center">
-            <h1 class="font-bold text-center ml[-10px] lg:ml-0"><i class="pi pi-calendar pr-3"
-                    style="font-size:1.5rem;"></i>Calendario</h1>
+            <h2 class="font-bold text-center ml[-10px] lg:ml-0 text-2xl"><i class="pi pi-calendar pr-3"
+                    style="font-size:1.5rem;"></i>Calendario</h2>
         </div>
-        <h3 class="text-xl font-bold">{{currentMonthSelected}}</h3>
+        <div class="month-navigation lg:hidden flex justify-between items-center mb-4">
+            <button pButton icon="pi pi-chevron-left" (click)="previousMonth()"
+                class="p-button-rounded p-button-text p-button-sm"></button>
+
+            <h3
+                class="text-xl mt-3 text-center font-bold px-2.5 py-1 dark:text-sky-500 text-sky-600 border-5 border-double rounded-lg">
+                {{currentMonthSelected}} - {{currentDateSelected.getFullYear()}}</h3>
+
+            <button pButton icon="pi pi-chevron-right" (click)="nextMonth()"
+                class="p-button-rounded p-button-text p-button-sm" ></button>
+        </div>
         <div class="m-auto">
-            <span class="block text-center p-3">{{ weekDayName(displayedDays[1].fecha!) }}</span>
+            <span class="block text-center p-3 text-lg">{{ weekDayName(displayedDays[1].fecha!) }}</span>
             <div class="bg-sky-500 rounded-md max-h-[20rem]">
                 <p class="text-right p-3 text-lg">{{displayedDays[1].fecha | date:'dd'}}</p>
 
@@ -24,8 +34,8 @@
                 </div>
 
                 <div class="arrow-buttons px-5 py-3 pb-5 flex flex-row justify-between">
-                    <p-button (click)="previous()" icon="pi pi-angle-left" rounded="true"></p-button>
-                    <p-button (click)="next()" icon="pi pi-angle-right" rounded="true"></p-button>
+                    <p-button (click)="previous()" severity="contrast" icon="pi pi-angle-left" rounded="true"></p-button>
+                    <p-button (click)="next()" severity="contrast" icon="pi pi-angle-right" rounded="true"></p-button>
                 </div>
             </div>
         </div>
@@ -34,14 +44,23 @@
     <!-- Calendario grande -->
     <div class="hidden lg:flex flex-col h-full w-full">
         <div class="arrow-buttons px-5 py-3 pb-5 flex flex-row justify-between">
-            <p-button (click)="previousBig()" icon="pi pi-angle-left" rounded="true" size="small"></p-button>
+            <p-button (click)="previousBig()" icon="pi pi-angle-left" rounded="true" size="small"
+                pTooltip="Día anterior" tooltipPosition="left"></p-button>
             <h2 class="text-2xl font-bold"><i class="pi pi-calendar pr-3" style="font-size:1.5rem;"></i>Calendario</h2>
-            <p-button (click)="nextBig()" icon="pi pi-angle-right" rounded="true" size="small"></p-button>
+            <p-button (click)="nextBig()" icon="pi pi-angle-right" rounded="true" size="small"
+                pTooltip="Día siguiente"></p-button>
         </div>
-        <div class="m-2 flex flex-row justify-end">
-            <h3
-                class="text-xl text-right font-bold px-2.5 py-1 dark:text-sky-500 text-sky-600 border-5 border-double rounded-lg">
-                {{currentMonthSelected}} - {{currentDateSelected.getFullYear()}}</h3>
+        <div class="m-2 flex flex-row justify-center">
+
+            <div class="month-navigation hidden lg:flex justify-between items-center mb-4">
+                <button pButton icon="pi pi-chevron-left" (click)="previousMonth()"
+                    class="p-button-rounded p-button-text" pTooltip="Mes anterior" tooltipPosition="left"></button>
+                <h3
+                    class="text-xl text-center font-bold px-2.5 py-1 dark:text-sky-500 text-sky-600 border-5 border-double rounded-lg">
+                    {{currentMonthSelected}} - {{currentDateSelected.getFullYear()}}</h3>
+                <button pButton icon="pi pi-chevron-right" (click)="nextMonth()" class="p-button-rounded p-button-text"
+                    pTooltip="Mes siguiente"></button>
+            </div>
         </div>
         <div class="flex flex-row gap-2 flex-grow">
             <div *ngFor="let day of displayedDays" class="flex-grow">
@@ -51,14 +70,14 @@
                         <p class="text-right p-3 text-lg">{{day.fecha | date:'dd'}}</p>
                         <div class="flex flex-col flex-grow justify-center">
                             <div *ngIf="day.event === null"
-                                class="border-dashed border-2 rounded-md lg:m-3 p-5 m-1 flex-grow cursor-pointer"
+                                class="border-dashed border-2 rounded-md lg:m-3 lg:mt-0 p-5 m-1 flex-grow cursor-pointer"
                                 (click)="showAddEventDialog(day.fecha)">
                                 <div class="h-full flex items-center justify-center">
                                     <i class="pi pi-plus"></i> Nuevo Evento
                                 </div>
                             </div>
                             <div *ngIf="day.event !== null"
-                                class="p-5 lg:m-3 dark:bg-gray-900 bg-sky-400 rounded-md m-2 flex-grow cursor-pointer"
+                                class="p-5 lg:m-3 lg:mt-0 dark:bg-gray-900 bg-sky-400 rounded-md m-2 flex-grow cursor-pointer"
                                 (click)="showEventDialog(day)">
                                 <h3 class="text-xl font-bold">{{day.event.titulo | titleTruncate}}</h3>
                                 <p class="max-w-50">{{day.event.descripcion | descTruncate}}</p>
@@ -68,6 +87,6 @@
                 </div>
             </div>
         </div>
-        
+
     </div>
 </section>

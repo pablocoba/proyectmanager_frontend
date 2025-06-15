@@ -1,4 +1,4 @@
-<header>
+<header class="relative">
     <nav>
         <ul class="flex flex-row lg:gap-1 lg:align-center justify-between lg:justify-start p-5">
             <p-drawer *ngIf="proyectosUsuario && proyectosUsuario.length > 0" #drawerRef [(visible)]="visible" position="left" [modal]="false">
@@ -63,7 +63,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a pRipple
+                                    <a (click)="openProjectSettings()" pRipple
                                         class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
                                         <i class="pi pi-cog mr-2"></i>
                                         <span class="font-medium">Configuración de proyecto</span>
@@ -90,6 +90,9 @@
             <li>
                 <p-button (click)="menu.toggle($event)" link="true" icon="pi pi-plus" size="large">
                 </p-button>
+            </li>
+            <li class="hidden lg:block mt-2">
+                <p-button (click)="onChatbarChange()" icon="pi pi-comments" rounded="true"></p-button>
             </li>
             <p-drawer *ngIf="proyectosUsuario && proyectosUsuario.length > 0" #drawerRef [(visible)]="chatVisibility" position="right" [modal]="false">
                 <ng-template #headless>
@@ -129,5 +132,5 @@
         </ul>
     </nav>
     <p-menu #menu [popup]="true" [model]="items"></p-menu>
-
+<p-button class="fixed lg:hidden bottom-6 right-6" (click)="onChatbarChange()" icon="pi pi-comments" rounded="true" size="large"></p-button>
 </header>

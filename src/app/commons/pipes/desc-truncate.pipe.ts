@@ -71,7 +71,7 @@ export class TareaTruncatePipe implements PipeTransform {
 })
 export class TareaTitleTruncatePipe implements PipeTransform {
 
-  transform(value: string | null | undefined, maxLength: number = 18): string {
+  transform(value: string | null | undefined, maxLength: number = 15): string {
     // Si el valor no es una cadena o es nulo/indefinido, devuelve una cadena vacía o el valor original.
     if (typeof value !== 'string') {
       return ''; // O puedes devolver el valor tal cual si prefieres: return value;

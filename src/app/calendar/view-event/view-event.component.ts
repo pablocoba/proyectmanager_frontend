@@ -59,26 +59,32 @@ export class ViewEventComponent {
     
     saveChanges() {
       if (this.eventForm.valid && this.currentEvent) {
-        this.currentEvent.titulo = this.eventForm.get('titulo')?.value
-        this.currentEvent.descripcion = this.eventForm.get('descripcion')?.value
-        let eventoDto : EventoDto={
+        const eventoDto: EventoDto = {
           titulo: this.eventForm.get('titulo')?.value,
           fecha: this.currentEvent.fecha,
           descripcion: this.eventForm.get('descripcion')?.value,
-          proyecto:this.config.data.project
-        }
+          proyecto: this.config.data.project
+        };
 
         this.eventoService.updateEvento(this.currentEvent.idEvento, eventoDto).subscribe({
-          next: (evento) => {
-            this.editMode = false;
-            this.ref.close(true); // Cierra el diálogo y emite confirmación
+          next: (eventoActualizado) => {
+            this.ref.close('updated'); // ⭐ Cierra con señal clara
           },
           error: (err) => console.error('Error al guardar:', err)
         });
       }
     }
 
-    deleteEvent(){
-      this.ref.close(this.currentEvent?.idEvento!); 
+    deleteEvent() {
+      if (confirm('¿Estás seguro de eliminar este evento?')) {
+        if (this.currentEvent) {
+          this.eventoService.deleteEvento(this.currentEvent.idEvento).subscribe({
+            next: () => {
+              this.ref.close('deleted'); // Envía señal clara de eliminación
+            },
+            error: (err) => console.error('Error al eliminar:', err)
+          });
+        }
+      }
     }
 }

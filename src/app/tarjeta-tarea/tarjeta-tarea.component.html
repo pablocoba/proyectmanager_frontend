@@ -1,24 +1,32 @@
-<div class="bg-sky-500 p-2 rounded-md overflow-hidden">
-
-        <form class="lg:block hidden" [formGroup]="tarjetaTareaForm">
-            <div class="dark:bg-gray-900 bg-sky-400 rounded-md p-3 flex flex-row justify-between">
-                <h3 class="text-left font-bold">{{tareaData.titulo | tareaTitleTruncate}}</h3>
-                <p-checkbox formControlName="check" binary="true" />
-            </div>
-            <div class="text-start p-3">
-                {{tareaData.descripcion | tareaTruncate}}
-            </div>
-        </form>
-        <form class="lg:hidden block" [formGroup]="tarjetaTareaForm">
-            <div class="dark:bg-gray-900 rounded-md p-3 flex flex-row justify-between">
-                <h3 class="text-left font-bold">{{tareaData.titulo}}</h3>
-                <p-checkbox formControlName="check" binary="true" />
-            </div>
-            <div class="text-start p-3">
-                {{tareaData.descripcion}}
-            </div>
-        </form>
+<div class="bg-sky-500 p-2 rounded-md overflow-hidden relative">
+    <!-- Menú de opciones -->
+    <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body"></p-menu>
     
+
+    <form class="lg:block hidden" [formGroup]="tarjetaTareaForm">
+        <div class="dark:bg-gray-900 bg-sky-700 rounded-md p-3 flex flex-row justify-between items-center">
+            <h3 class="text-left font-bold">{{tareaData.titulo | tareaTitleTruncate}}</h3>
+            <div class="flex flex-row justify-between items-center" >
+                <button pButton icon="pi pi-ellipsis-v" (click)="menu.toggle($event)"
+        class="p-button-rounded p-button-text p-button-sm" severity="contrast"></button>
+                <p-checkbox formControlName="check" binary="true" class="pl-1 pb-1"/>
+            </div>
+        </div>
+        <div class="text-start p-3">
+            {{tareaData.descripcion}}
+        </div>
+    </form>
+    <form class="lg:hidden block" [formGroup]="tarjetaTareaForm">
+        <div class="dark:bg-gray-900 bg-sky-700 rounded-md p-3 flex flex-row justify-between items-center">
+            <h3 class="text-left font-bold">{{tareaData.titulo}}</h3>
+            <div class="flex flex-row justify-between items-center" >
+                <button pButton icon="pi pi-ellipsis-v" (click)="menu.toggle($event)"
+        class="p-button-rounded p-button-text p-button-sm" severity="secondary"></button>
+                <p-checkbox formControlName="check" binary="true" class="pl-1 pb-1" />
+            </div>
+        </div>
+        <div class="text-start p-3">
+            {{tareaData.descripcion | tareaTruncate}}
+        </div>
+    </form>
 </div>
-
-

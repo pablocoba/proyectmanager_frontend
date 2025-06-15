@@ -1,0 +1,38 @@
+<div class="p-4 dark:bg-sky-500 bg-zinc-100 text-white rounded-lg">
+    <form [formGroup]="updateProyectoForm" (ngSubmit)="saveSettings()">
+        <div class="flex flex-col gap-3 p-3">
+            <div class="flex flex-row items-center align-center">
+                <label for="titulo" class="text-zinc-800"> Cambiar título</label>
+                <p-checkbox [binary]="true" size="large" class="pl-2" formControlName="checkNombre" />
+            </div>
+            <input pInputText class="mr-auto rounded-md" id="nombre" formControlName="nombre" placeholder="Título" />
+
+            <div class="flex flex-row items-center align-center">
+                <label for="descripcion" class="text-zinc-800"> Cambiar descripción</label>
+                <p-checkbox [binary]="true" size="large" class="pl-2" formControlName="checkDesc" />
+            </div>
+            <input pInputText class="mr-auto rounded-md" id="descripcion" formControlName="descripcion"
+                placeholder="Descripción" />
+
+            <div class="flex flex-row items-center align-center">
+                <label for="fechaFin" class="text-zinc-800"> Cambiar fecha de fin</label>
+                <p-checkbox [binary]="true" size="large" class="pl-2" formControlName="checkFecha" />
+            </div>
+            <p-datepicker class="mr-auto rounded-md" id="fechaFin" formControlName="fechaFin" placeholder="Fecha de fin"
+                appendTo="body" [showIcon]="true" [readonlyInput]="true"
+                [disabled]="!updateProyectoForm.get('checkFecha')?.value" dateFormat="dd/mm/yy">
+            </p-datepicker>
+        </div>
+        <div class="flex justify-between mt-4">
+            <p-button label="Eliminar proyecto" 
+                      icon="pi pi-trash" 
+                      styleClass="p-button-danger" 
+                      (onClick)="confirmDelete()">
+            </p-button>
+            <p-button label="Guardar" 
+                      [disabled]="updateProyectoForm.pristine" 
+                      type="submit">
+            </p-button>
+        </div>
+    </form>
+</div>

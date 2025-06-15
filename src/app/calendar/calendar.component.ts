@@ -18,6 +18,8 @@ import { CalendarDay } from '../commons/dto/CalendarDay';
 import { ViewEventComponent } from './view-event/view-event.component';
 import { CurrentProyectoService } from '../commons/services/CurrentProyectoService';
 import { UserToken } from '../commons/dto/UserToken';
+import { TooltipModule } from 'primeng/tooltip';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 
 @Component({
@@ -27,7 +29,8 @@ import { UserToken } from '../commons/dto/UserToken';
     DynamicDialogModule,
     DescTruncatePipe,
     ButtonModule,
-    TitleTruncatePipe
+    TitleTruncatePipe,
+    TooltipModule
   ],
   changeDetection:ChangeDetectionStrategy.OnPush,
   templateUrl: './calendar.component.html',
@@ -35,7 +38,8 @@ import { UserToken } from '../commons/dto/UserToken';
   providers: [
     DialogService,
     AlertService,
-    MessageService
+    MessageService,
+    ConfirmDialogModule
   ],
 })
 export class CalendarComponent implements OnInit{
@@ -52,7 +56,8 @@ export class CalendarComponent implements OnInit{
   eventos : Evento[] = [];
   currentDateSelected: Date = new Date();
   currentMonthSelected : string = this.getMonthName(new Date());
-
+  currentMonthView: Date = new Date(); // Para controlar la vista mensual
+  
   hasEvent: boolean = false;
   user !: UserToken;
   currentEvent !: Evento
@@ -112,18 +117,23 @@ export class CalendarComponent implements OnInit{
     this.currentProyecto.proyectoActual$.subscribe(idProyecto => {
       console.log('ID Proyecto recibido:', idProyecto);
       
-      // 3. Si hay un proyecto seleccionado
       if (idProyecto !== null) {
         this.proyectoService.getProyectosById(idProyecto).subscribe({
-          next: (proyecto) => {
+          next: async (proyecto) => { // ⭐ Convertido en async
             this.currentProject = proyecto;
             console.log('Proyecto cargado:', proyecto);
-            this.loadEventos();
-            this.cdr.detectChanges;
+            
+            // ⭐ 1. Cargar eventos primero
+            await this.loadEventos(); 
+            
+            // ⭐ 2. Actualizar vista después de cargar
+            this.updateCalendarView();
+            
+            // ⭐ 3. Forzar detección de cambios
+            this.cdr.detectChanges();
           },
           error: (err) => {
             console.error('Error al cargar proyecto:', err);
-
           }
         });
       } else {
@@ -138,6 +148,36 @@ export class CalendarComponent implements OnInit{
     this.currentDateSelected = new Date()
     this.updateCalendarView();
   }
+
+
+  previousMonth(): void {
+  this.currentMonthView = new Date(
+    this.currentMonthView.getFullYear(),
+    this.currentMonthView.getMonth() - 1,
+    1
+  );
+  this.updateMonthView();
+}
+
+nextMonth(): void {
+  this.currentMonthView = new Date(
+    this.currentMonthView.getFullYear(),
+    this.currentMonthView.getMonth() + 1,
+    1
+  );
+  this.updateMonthView();
+}
+
+updateMonthView(): void {
+  // Establece el día actual al primer día del mes
+  this.currentDateSelected = new Date(
+    this.currentMonthView.getFullYear(),
+    this.currentMonthView.getMonth(),
+    1
+  );
+  this.currentMonthSelected = this.getMonthName(this.currentMonthView);
+  this.updateCalendarView();
+}
 
   //abre el diálogo de añadir evento y le pasa los datos.
   showAddEventDialog(dayData:Date) {
@@ -207,20 +247,15 @@ export class CalendarComponent implements OnInit{
       baseZIndex: 10000
     });
 
-    this.dialogSubscription = this.ref.onClose.subscribe(async event => { // <-- Mantén 'async' aquí
-    try {
-      // Si loadEventos ya devuelve una Promise, SOLO usa await directamente:
-      await this.eventoService.deleteEvento(event).toPromise();
-      await this.loadEventos(); 
-      this.hasEvent = false; 
-      this.updateCalendarView();
-
-    } catch (error) {
-      console.error("Error al cargar eventos tras cerrar diálogo:", error);
-    }
-  });
-
-  }
+    this.dialogSubscription = this.ref.onClose.subscribe((result) => {
+      if (result === 'updated' || result === 'deleted') {
+        this.loadEventos().then(() => {
+          this.updateCalendarView();
+          this.cdr.detectChanges();
+        });
+      }
+    });
+}
 
 
   next(): void {
@@ -298,22 +333,22 @@ private updateCalendarView(): void {
     this.cdr.detectChanges(); // <--- FORZAR DETECCIÓN DE CAMBIOS por OnPush
 }
 
-  async loadEventos() {
-  try {
-    if (!this.currentProject) return; // Si no hay proyecto, salir
-    
-    const eventos = await this.eventoService.getEventosByProyecto(this.currentProject.idProyecto).toPromise();
-    this.eventos = eventos || [];
-    console.log("eventos cargados:",eventos)
-    // Actualizar la vista
-    this.updateCalendarView();
-    this.cdr.detectChanges();
-    
-  } catch (error) {
-    console.error('Error:', error);
-    this.eventos = [];
+  async loadEventos(): Promise<void> {
+    try {
+      console.log('Cargando eventos...'); // ⭐ Log de depuración
+      if (!this.currentProject) return;
+      
+      const eventos = await this.eventoService.getEventosByProyecto(
+        this.currentProject.idProyecto
+      ).toPromise();
+      
+      this.eventos = eventos || [];
+      console.log('Eventos cargados:', this.eventos); // ⭐ Verifica datos
+    } catch (error) {
+      console.error('Error cargando eventos:', error);
+      this.eventos = [];
+    }
   }
-}
 
   updateCurrentDayEventState(): void {
   let eventFoundForCurrentDay: Evento | null = null;

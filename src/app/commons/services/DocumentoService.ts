@@ -1,22 +1,44 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { Evento } from "../dto/Evento";
 import { Proyecto } from "../dto/Proyecto";
+import { Documento } from "../dto/Documento";
+import { CreateDocumentoDto } from "../dto/CreateDocumentoDto";
 
 @Injectable({
     providedIn: 'root'
 })
 
-export class EventoService {
+export class DocumentoService {
     private baseUrl : string = 'https://tfc-t00f.onrender.com';
-    private docsUrl : string = '/eventos';
+    private docsUrl : string = '/documentos';
     private eventosByProyectIdUrl : string = '/eventos/proyecto/';
     constructor(private http: HttpClient){ }
 
-    getProyectos(): Observable<Proyecto[]>{
-        return this.http.get<Proyecto[]>(`${this.baseUrl}${this.docsUrl}`);
+    getDocumentos(): Observable<Documento[]>{
+        return this.http.get<Documento[]>(`${this.baseUrl}${this.docsUrl}`);
     }
+
+    getDocumentosByProyecto(idProyecto: number): Observable<Documento[]> {
+        return this.http.get<Documento[]>(`${this.baseUrl}${this.docsUrl}/proyecto/${idProyecto}`);
+    }
+
+    uploadDocumento(dto : CreateDocumentoDto): Observable<any> {
+        return this.http.post<any>(`${this.baseUrl}${this.docsUrl}`, dto
+        );
+    }
+
+    deleteDocumento(idDocumento: number): Observable<void> {
+        return this.http.delete<void>(`${this.baseUrl}${this.docsUrl}/${idDocumento}`);
+    }
+
+    downloadDocumento(idDocumento: number): Observable<Blob> {
+        return this.http.get(`${this.baseUrl}${this.docsUrl}/${idDocumento}`, {
+        responseType: 'blob'
+        });
+    }
+
     // createEvento(dto: EventoDto): Observable<any> {
     //     return this.http.post<any>(`${this.baseUrl}${this.eventosUrl}`, dto);
     // }

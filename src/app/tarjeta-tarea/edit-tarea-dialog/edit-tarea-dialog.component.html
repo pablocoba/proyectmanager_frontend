@@ -1,0 +1,45 @@
+<div class="p-4">
+    <h2 class="text-xl font-bold mb-4">Editar Tarea</h2>
+
+    <form [formGroup]="editForm" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-2">
+            <label for="titulo">Título *</label>
+            <input pInputText id="titulo" formControlName="titulo" [disabled]="loading" />
+            <small *ngIf="editForm.get('titulo')?.invalid && editForm.get('titulo')?.touched" class="text-red-500">El
+                título es requerido</small>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <label for="descripcion">Descripción *</label>
+            <textarea pInputTextarea id="descripcion" formControlName="descripcion" rows="3"
+                [disabled]="loading"></textarea>
+            <small *ngIf="editForm.get('descripcion')?.invalid && editForm.get('descripcion')?.touched"
+                class="text-red-500">La descripción es requerida</small>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-2">
+                <label for="fechaInicio">Fecha Inicio *</label>
+                <p-datepicker id="fechaInicio" formControlName="fechaInicio" [showIcon]="true"
+                    [disabled]="loading" appendTo="body"></p-datepicker>
+                <small *ngIf="editForm.get('fechaInicio')?.invalid && editForm.get('fechaInicio')?.touched"
+                    class="text-red-500">La fecha de inicio es requerida</small>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label for="fechaFin">Fecha Fin *</label>
+                <p-datepicker id="fechaFin" formControlName="fechaFin" [showIcon]="true"
+                    [disabled]="loading" appendTo="body"></p-datepicker>
+                <small *ngIf="editForm.get('fechaFin')?.invalid && editForm.get('fechaFin')?.touched"
+                    class="text-red-500">La fecha de fin es requerida</small>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-4">
+            <button pButton type="button" label="Cancelar" (click)="cancelar()" class="p-button-secondary"
+                [disabled]="loading"></button>
+            <button pButton type="button" label="Guardar" (click)="guardarCambios()"
+                [disabled]="!editForm.valid || loading" [loading]="loading"></button>
+        </div>
+    </form>
+</div>
