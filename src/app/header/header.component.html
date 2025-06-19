@@ -1,7 +1,7 @@
 <header class="relative">
     <nav>
         <ul class="flex flex-row lg:gap-1 lg:align-center justify-between lg:justify-start p-5">
-            <p-drawer *ngIf="proyectosUsuario && proyectosUsuario.length > 0" #drawerRef [(visible)]="visible" position="left" [modal]="false">
+            <p-drawer class="dark:bg-[#18181B] bg-[#FFFFFF]" *ngIf="proyectosUsuario && proyectosUsuario.length > 0" #drawerRef [(visible)]="visible" position="left" [modal]="false">
                 <ng-template #headless>
                     <div class="flex flex-col h-full">
                         <div class="flex flex-row justify-between px-4 pt-4">
@@ -94,7 +94,7 @@
             <li class="hidden lg:block mt-2">
                 <p-button (click)="onChatbarChange()" icon="pi pi-comments" rounded="true"></p-button>
             </li>
-            <p-drawer *ngIf="proyectosUsuario && proyectosUsuario.length > 0" #drawerRef [(visible)]="chatVisibility" position="right" [modal]="false">
+            <p-drawer class="dark:bg-[#18181B] bg-[#FFFFFF]" *ngIf="proyectosUsuario && proyectosUsuario.length > 0" #drawerRef [(visible)]="chatVisibility" position="right" [modal]="false">
                 <ng-template #headless>
                     <div class="flex flex-col h-full">
                         <div class="flex flex-row justify-between px-6 pt-6">
