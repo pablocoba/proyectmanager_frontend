@@ -3,7 +3,7 @@ import { MenuItem } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { catchError, distinctUntilChanged, of, Subscription, switchMap, take } from 'rxjs';
+import { catchError, distinctUntilChanged, of, Subscription, switchMap, take, tap } from 'rxjs';
 import { AlertService } from '../commons/services/AlertService';
 import { CreateTareaDialogComponent } from './create-tarea-dialog/create-tarea-dialog.component';
 import { UserToken } from '../commons/dto/UserToken';
@@ -71,6 +71,8 @@ export class HeaderComponent implements OnInit {
   @Output() sidebarStateChange = new EventEmitter<boolean>();
   @Output() proyectoCreado = new EventEmitter<void>();
   @Output() tareaCreada = new EventEmitter<void>();
+  @Input() proyectoActual: number | null = null;
+  @Input() proyectosUsuario: MiembroProyectoDto[] | null = null;
   membersPopoverVisible: boolean = false;
   availableMembers: any[] = [];
   selectedMembers: number[] = []; 
@@ -90,8 +92,7 @@ export class HeaderComponent implements OnInit {
     }
   ];
 
-  @Input() proyectoActual: number | null = null;
-  @Input() proyectosUsuario: MiembroProyectoDto[] | null = null;
+  
   ref: DynamicDialogRef | undefined;
   private dialogSubscription: Subscription | undefined; // Para gestionar la suscripción
 
@@ -99,7 +100,9 @@ export class HeaderComponent implements OnInit {
   proyectos: ProyectoDto[] = [];
   username !: string;
   currentMember !: MiembroDto;
+  
   @ViewChild('op') op!: OverlayPanel;
+
   nuevoProyecto: CreateProyectoDto = {
     nombre: "prueba",
     descripcion: "prueba",
@@ -568,58 +571,110 @@ export class HeaderComponent implements OnInit {
     return;
   }
 
-  // 1. Obtener el proyecto actual con sus miembros
-  this.proyectoService.getProyectoCompletoById(this.currentProject.idProyecto).subscribe({
-    next: (proyectoCompleto) => {
-      // 2. Preparar array de miembros actuales en formato correcto
-      const miembrosActuales = proyectoCompleto.miembros.map(miembro => ({
-        miembro: { idMiembro: miembro.idMiembro }
-      }));
+  const proyectoId = this.currentProject.idProyecto;
 
-      // 3. Preparar array de nuevos miembros (sin duplicados)
+  // 1. Obtener miembros actuales (versión optimizada)
+  this.proyectoService.getProyectoCompletoById(proyectoId).pipe(
+    switchMap(proyectoCompleto => {
+      // 2. Crear lista de IDs actuales
+      const idsActuales = new Set(proyectoCompleto.miembros.map(m => m.idMiembro));
+
+      // 3. Filtrar y crear nuevos miembros
       const nuevosMiembros = miembrosIds
-        .filter(id => !miembrosActuales.some(m => m.miembro.idMiembro === id))
-        .map(id => ({
-          miembro: { idMiembro: id } // Formato exacto requerido
-        }));
+        .filter(id => !idsActuales.has(id))
+        .map(id => ({ miembro: { idMiembro: id } }));
 
-      // 4. Combinar miembros actuales y nuevos
-      const todosLosMiembros = [...miembrosActuales, ...nuevosMiembros];
-
-      // 5. Crear DTO exacto con la estructura requerida
-      if (!this.currentProject) {
-        console.error('No hay proyecto seleccionado');
-        return;
+      if (nuevosMiembros.length === 0) {
+        console.log('No hay miembros nuevos para agregar');
+        return of(null);
       }
+
+      // 4. Crear DTO de actualización
       const updateDto: CreateProyectoDto = {
-        nombre: this.currentProject?.nombre ?? '',
-        descripcion: this.currentProject?.descripcion ?? '',
-        fechaInicio: new Date(this.currentProject?.fechaInicio ?? new Date()),
+        nombre: this.currentProject?.nombre!,
+        descripcion: this.currentProject?.descripcion!,
+        fechaInicio: new Date(this.currentProject?.fechaInicio!),
         fechaFin: this.currentProject && this.currentProject.fechaFin ? new Date(this.currentProject.fechaFin) : new Date(),
-        miembrosProyecto: todosLosMiembros
+        miembrosProyecto: [
+          ...proyectoCompleto.miembros.map(m => ({ miembro: { idMiembro: m.idMiembro } })),
+          ...nuevosMiembros
+        ]
       };
 
-      console.log('DTO enviado al backend:', JSON.stringify(updateDto, null, 2));
+      console.log('DTO de actualización:', JSON.stringify(updateDto, null, 2));
 
-      // 6. Enviar actualización al backend
-      this.proyectoService.updateProyecto(this.currentProject.idProyecto, updateDto).subscribe({
-        next: (proyectoActualizado) => {
-          console.log('Proyecto actualizado:', proyectoActualizado);
-          
-          // Actualizar vista
-          this.currentProject = proyectoActualizado;
-          this.loadAvailableMembers();
-          this.cdr.detectChanges();
+      // 5. Enviar actualización
+      return this.proyectoService.updateProyecto(proyectoId, updateDto).pipe(
+        tap(() => console.log('Actualización enviada al backend')),
+        catchError(error => {
+          console.error('Error en la actualización:', error);
+          throw error;
+        })
+      );
+    }),
+    // 6. Refrescar datos solo si la actualización fue exitosa
+    switchMap(() => this.proyectoService.getProyectoCompletoById(proyectoId))
+  ).subscribe({
+    next: (proyectoActualizado) => {
+      if (!proyectoActualizado) return;
 
-        },
-        error: (error) => {
-          console.error('Error al actualizar proyecto:', error);
+      console.log('Proyecto actualizado:', proyectoActualizado);
 
-        }
-      });
+      // 8. Actualizar lista de miembros disponibles
+      this.loadAvailableMembers();
+      
+      // 9. Forzar actualización de la vista
+      this.cdr.detectChanges();
+    },
+    error: (error) => console.error('Error en el proceso completo:', error)
+  });
+}
+
+// Método auxiliar para parsear fechas
+private parseDate(date: any): Date {
+  if (!date) return new Date();
+  return date instanceof Date ? date : new Date(date);
+}
+
+// Método para refrescar los datos del proyecto
+private refreshProjectData(proyectoId: number) {
+  // 1. Obtener proyecto completo
+  this.proyectoService.getProyectoCompletoById(proyectoId).subscribe({
+    next: (proyectoActualizado) => {
+      console.log('Proyecto actualizado completo:', proyectoActualizado);
+      
+      // 2. Actualizar currentProject
+      this.currentProject = {
+        ...this.currentProject,
+        ...proyectoActualizado,
+        fechaInicio: proyectoActualizado.fechaInicio instanceof Date
+          ? proyectoActualizado.fechaInicio.toISOString()
+          : proyectoActualizado.fechaInicio,
+        fechaFin: proyectoActualizado.fechaFin instanceof Date
+          ? proyectoActualizado.fechaFin.toISOString()
+          : proyectoActualizado.fechaFin
+      };
+
+      // 3. Actualizar proyectosUsuario si es necesario
+      if (this.proyectosUsuario) {
+        this.proyectosUsuario = this.proyectosUsuario.map(p => 
+          p.idProyecto === proyectoId 
+            ? { ...p, miembros: proyectoActualizado.miembros } 
+            : p
+        );
+      }
+
+      // 4. Recargar miembros disponibles
+      this.loadAvailableMembers();
+      
+      // 5. Forzar actualización de la vista
+      this.cdr.detectChanges();
+      
+      // 6. Mostrar feedback al usuario
+      console.log('Miembros agregados correctamente');
     },
     error: (error) => {
-      console.error('Error al obtener proyecto:', error);
+      console.error('Error al obtener proyecto actualizado:', error);
     }
   });
 }

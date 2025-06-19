@@ -29,4 +29,5 @@ export class EventoService {
     deleteEvento(id:number):Observable<any>{
         return this.http.delete<any>(`${this.baseUrl}${this.eventosUrl}/${id}`)
     }
+    
 }

@@ -86,17 +86,14 @@ export class TarjetaTareaComponent implements OnInit {
 
     this.ref.onClose.subscribe((tareaActualizada: TareaDto) => {
         if (tareaActualizada) {
-            // Solo actualizamos los datos locales con lo que vino del diálogo
             this.tareaData = {
                 ...this.tareaData,
                 titulo: tareaActualizada.titulo,
                 descripcion: tareaActualizada.descripcion,
                 fechaInicio: tareaActualizada.fechaInicio,
                 fechaFin: tareaActualizada.fechaFin
-                // El estado se mantiene igual a menos que lo modifiques
             };
             
-            // Actualizar el estado del checkbox si es necesario
             const isCompleted = this.tareaData.estado === EstadoTarea.COMPLETADA;
             this.tarjetaTareaForm.get('check')?.setValue(isCompleted, { emitEvent: false });
         }

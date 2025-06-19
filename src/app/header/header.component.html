@@ -131,7 +131,6 @@
         </ul>
     </nav>
     <p-menu #menu [popup]="true" [model]="items"></p-menu>
-    
     <!-- Popover para agregar miembros -->
     <p-overlayPanel #op>
         <div class="p-3" style="width: 250px">
@@ -161,5 +160,5 @@
             </ng-template>
         </div>
     </p-overlayPanel>
-<p-button class="fixed lg:hidden bottom-6 right-6" (click)="onChatbarChange()" icon="pi pi-comments" rounded="true" size="large"></p-button>
+<p-button class="fixed lg:hidden bottom-6 right-6 z-999000" (click)="onChatbarChange()" icon="pi pi-comments" rounded="true" size="large"></p-button>
 </header>

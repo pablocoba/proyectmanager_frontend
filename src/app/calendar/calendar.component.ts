@@ -260,20 +260,20 @@ updateMonthView(): void {
 
   next(): void {
   this.currentDateSelected.setDate(this.currentDateSelected.getDate() + 1);
-  this.updateCalendarView(); // <--- LLAMADA A LA FUNCIÓN CENTRAL
+  this.updateCalendarView(); // LLAMADA A LA FUNCIÓN CENTRAL
 }
 
 previous(): void {
   this.currentDateSelected.setDate(this.currentDateSelected.getDate() - 1);
-  this.updateCalendarView(); // <--- LLAMADA A LA FUNCIÓN CENTRAL
+  this.updateCalendarView(); 
 }
 
 nextBig(): void {
-    this.currentDateSelected.setDate(this.currentDateSelected.getDate() + 1); // O +N si quieres saltos grandes
+    this.currentDateSelected.setDate(this.currentDateSelected.getDate() + 1); 
     this.updateCalendarView();
 }
 previousBig(): void {
-    this.currentDateSelected.setDate(this.currentDateSelected.getDate() - 1); // O -N si quieres saltos grandes
+    this.currentDateSelected.setDate(this.currentDateSelected.getDate() - 1);
     this.updateCalendarView();
 }
 
@@ -327,15 +327,14 @@ previousBig(): void {
 }
 
 private updateCalendarView(): void {
-    this.displayedDays = this.generateDisplayedDays(this.currentDateSelected); // Regenera los días
-    this.currentMonthSelected = this.getMonthName(this.currentDateSelected); // Actualiza el nombre del mes
-    this.checkTodayEvent(); // Revisa eventos para el día central
-    this.cdr.detectChanges(); // <--- FORZAR DETECCIÓN DE CAMBIOS por OnPush
+    this.displayedDays = this.generateDisplayedDays(this.currentDateSelected); // actualiza los días
+    this.currentMonthSelected = this.getMonthName(this.currentDateSelected); // aactualiza el nombre del mes
+    this.checkTodayEvent(); // revisa eventos para el día central/actual
+    this.cdr.detectChanges(); 
 }
 
   async loadEventos(): Promise<void> {
     try {
-      console.log('Cargando eventos...'); // ⭐ Log de depuración
       if (!this.currentProject) return;
       
       const eventos = await this.eventoService.getEventosByProyecto(
@@ -343,7 +342,8 @@ private updateCalendarView(): void {
       ).toPromise();
       
       this.eventos = eventos || [];
-      console.log('Eventos cargados:', this.eventos); // ⭐ Verifica datos
+      console.log('Eventos cargados:', this.eventos); 
+      
     } catch (error) {
       console.error('Error cargando eventos:', error);
       this.eventos = [];

@@ -16,7 +16,7 @@
     <div *ngIf="tareas.length > 0; else noTarea">
         <!-- Versión para móvil -->
         <div *ngIf="isMobile" class="grid grid-cols-1 gap-4">
-            <app-tarjeta-tarea 
+            <app-tarjeta-tarea
                 *ngFor="let tarea of ampliarTareas ? tareas : (tareas | slice:0:4); let i = index"
                 [tareaData]="tarea"
                 [index]="i"

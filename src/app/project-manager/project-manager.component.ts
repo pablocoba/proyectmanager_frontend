@@ -39,6 +39,7 @@ import { MiembroDto } from '../commons/dto/MiembroDto';
 })
 
 export class ProjectManagerComponent implements OnInit{
+  
   @Input() proyectoActual: number | null = null;
   @Input() tamano: boolean | null = null;
   

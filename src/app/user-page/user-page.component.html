@@ -4,15 +4,11 @@
     <section *ngIf="proyectosUsuario && proyectosUsuario.length > 0 else crearProyecto" class="main-content">
       <div class="relative border-1 rounded-2xl p-5 lg:mx-[20%] m-5 dark:shadow-inner shadow-gray-500 transition overflow-y-hidden bg-white dark:bg-gray-900 relative">
         <app-project-manager [proyectoActual]="proyectoActual"></app-project-manager>
-        
       </div>
-      
       <div class="relative dark:shadow-inner shadow-gray-500/80 flex flex-col lg:flex-row justify-center border-1 rounded-2xl lg:p-5 px-7 m-5 lg:mx-[20%] py-5 bg-white dark:bg-gray-900">
         <app-calendar [proyectoActual]="proyectoActual"></app-calendar>
       </div>
-
     </section>
-    
     <ng-template #crearProyecto>
       <div (click)="createProyecto()" style="cursor:pointer" class="border-2 border-dashed lg:p-15 lg:mx-[30%] mx-[5%] p-10 text-center gap-7 rounded-lg flex flex-col justify-center p-5 items-center">
         <h2 class="font-bold text-xl">¡Comienza a organziarte creando tu primer proyecto!</h2>
@@ -21,4 +17,3 @@
     </ng-template>
 </ng-container>
 </main>
-

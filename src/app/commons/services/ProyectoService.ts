@@ -31,7 +31,6 @@ export class ProyectoService {
         return this.http.get<Proyecto>(`${this.baseUrl}${this.proyectosUrl}/${id}`);
     }
     
-    
     createProyecto(dto: CreateProyectoDto):Observable<any>{
         return this.http.post<any>(`${this.baseUrl}${this.proyectosUrl}`, dto);
     }
